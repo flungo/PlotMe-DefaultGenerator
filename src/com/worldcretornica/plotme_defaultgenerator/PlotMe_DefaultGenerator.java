@@ -1,8 +1,17 @@
 package com.worldcretornica.plotme_defaultgenerator;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
@@ -13,6 +22,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.yaml.snakeyaml.Yaml;
 
 import com.worldcretornica.plotme_defaultgenerator.PlotGen;
 
@@ -23,6 +33,8 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 	public static String VERSION;
 	public static String WEBSITE;
 	
+	public static String language;
+	
 	public static Logger logger = Logger.getLogger("Minecraft");
 		
 	public static String configpath;
@@ -30,13 +42,173 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
     
     public static Boolean usinglwc = false;
     
+    private static HashMap<String, String> captions;
+    
     private static GenPlotManager genPlotManager;
-    	
+    
+    public void onDisable()
+    {
+    	captions = null;
+    	genPlotManager = null;
+    	usinglwc = null;
+    	advancedlogging = null;
+    	configpath = null;
+    	logger = null;
+    	NAME = null;
+    	PREFIX = null;
+    	VERSION = null;
+    	WEBSITE = null;
+    }
+    
 	public void onEnable()
 	{
 		initialize();
+		
+		loadCaptions();
 	}
 	
+	private void loadCaptions() 
+	{
+		File filelang = new File(configpath, "caption-english.yml");
+		TreeMap<String, String> properties = new TreeMap<String, String>();
+		
+		//properties.put("MsgStartDeleteSession","Starting delete session");
+		
+		//properties.put("ConsoleHelpMain", " ---==PlotMe Console Help Page==---");
+		//properties.put("ConsoleHelpReload", " - Reloads the plugin and its configuration files");
+		
+		//properties.put("HelpTitle", "PlotMe Help Page");
+		/*properties.put("HelpPath", " width of the path");
+		properties.put("HelpPlot", " size of the plots");
+		properties.put("HelpHeight", " height of the road");
+		properties.put("HelpBottom", " block id at the bottom");
+		properties.put("HelpWall", " id of the plot border");
+		properties.put("HelpPlotFloor", " id of the plot surface");
+		properties.put("HelpFilling", " id of the blocks below surface");
+		properties.put("HelpRoadFloor1", " id of the road middle");
+		properties.put("HelpRoadFloor2", " id of the road border");*/
+		
+		//properties.put("WordWorld", "World");
+		properties.put("WordArguments", "arguments");
+		
+		//properties.put("InfoId", "ID");
+		
+		//properties.put("CommandBuy", "buy");
+		
+		//properties.put("ErrCannotBuild","You cannot build here.");
+		
+		CreateConfig(filelang, properties, "PlotMe Caption configuration αω");
+		
+		if (language != "english")
+		{
+			filelang = new File(configpath, "caption-" + language + ".yml");
+			CreateConfig(filelang, properties, "PlotMe DefaultGenerator Caption configuration");
+		}
+		
+		InputStream input = null;
+		
+		try
+		{				
+			input = new FileInputStream(filelang);
+		    Yaml yaml = new Yaml();
+		    Object obj = yaml.load(input);
+		
+		    if(obj instanceof LinkedHashMap<?, ?>)
+		    {
+				@SuppressWarnings("unchecked")
+				LinkedHashMap<String, String> data = (LinkedHashMap<String, String>) obj;
+							    
+			    captions = new HashMap<String, String>();
+				for(String key : data.keySet())
+				{
+					captions.put(key, data.get(key));
+				}
+		    }
+		} catch (FileNotFoundException e) {
+			logger.severe("[" + NAME + "] File not found: " + e.getMessage());
+			e.printStackTrace();
+		} catch (Exception e) {
+			logger.severe("[" + NAME + "] Error with configuration: " + e.getMessage());
+			e.printStackTrace();
+		} finally {                      
+			if (input != null) try {
+				input.close();
+			} catch (IOException e) {}
+		}
+	}
+	
+	private void CreateConfig(File file, TreeMap<String, String> properties, String Title)
+	{
+		if(!file.exists())
+		{
+			BufferedWriter writer = null;
+			
+			try{
+				File dir = new File(configpath, "");
+				dir.mkdirs();			
+				
+				writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8"));
+				writer.write("# " + Title);
+				
+				for(Entry<String, String> e : properties.entrySet())
+				{
+					writer.write("\n" + e.getKey() + ": '" + e.getValue().replace("'", "''") + "'");
+				}
+				
+				writer.close();
+			}catch (IOException e){
+				logger.severe("[" + NAME + "] Unable to create config file : " + Title + "!");
+				logger.severe(e.getMessage());
+			} finally {                      
+				if (writer != null) try {
+					writer.close();
+				} catch (IOException e2) {}
+			}
+		}
+		else
+		{
+			OutputStreamWriter writer = null;
+			InputStream input = null;
+			
+			try
+			{				
+				input = new FileInputStream(file);
+			    Yaml yaml = new Yaml();
+			    Object obj = yaml.load(input);
+			    
+			    if(obj instanceof LinkedHashMap<?, ?>)
+			    {
+					@SuppressWarnings("unchecked")
+					LinkedHashMap<String, String> data = (LinkedHashMap<String, String>) obj;
+					
+				    writer = new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8");
+					
+					for(Entry<String, String> e : properties.entrySet())
+					{						
+						if (!data.containsKey(e.getKey()))
+							writer.write("\n" + e.getKey() + ": '" + e.getValue().replace("'", "''") + "'");
+					}
+					
+					writer.close();
+					input.close();
+			    }
+			} catch (FileNotFoundException e) {
+				logger.severe("[" + NAME + "] File not found: " + e.getMessage());
+				e.printStackTrace();
+			} catch (Exception e) {
+				logger.severe("[" + NAME + "] Error with configuration: " + e.getMessage());
+				e.printStackTrace();
+			} finally {                      
+				if (writer != null) try {
+					writer.close();
+				} catch (IOException e2) {}
+				if (input != null) try {
+					input.close();
+				} catch (IOException e) {}
+			}
+		}
+	}
+
 	public static GenPlotManager getGenPlotManager()
 	{
 		return genPlotManager;
@@ -44,13 +216,13 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 	
 	public ChunkGenerator getDefaultWorldGenerator(String worldname, String id)
 	{		
-		if(genPlotManager.genplotmaps.containsKey(worldname))
+		String map = worldname.toLowerCase();
+		if(genPlotManager.genplotmaps.containsKey(map))
 		{
-			return new PlotGen(genPlotManager.getMap(worldname));
+			return new PlotGen(genPlotManager.getMap(map));
 		}
 		else
 		{
-			logger.warning(PREFIX + "Configuration not found for PlotMe world '" + worldname + "' Using defaults");
 			return new PlotGen();
 		}
 	}
@@ -308,7 +480,6 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 			worlds.set(worldname, currworld);
 			
 			genPlotManager.genplotmaps.put(worldname.toLowerCase(), tempPlotInfo);
-			logger.info("map : " + worldname.toLowerCase());
 		}
 		
 		try 
@@ -322,7 +493,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		}
     }
 	
-	private short getBlockId(ConfigurationSection cs, String section, String def)
+	private static short getBlockId(ConfigurationSection cs, String section, String def)
 	{
 		String idvalue = cs.getString(section, def.toString());
 		if(idvalue.indexOf(":") > 0)
@@ -335,7 +506,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		}
 	}
 	
-	private byte getBlockValue(ConfigurationSection cs, String section, String def)
+	private static byte getBlockValue(ConfigurationSection cs, String section, String def)
 	{
 		String idvalue = cs.getString(section, def.toString());
 		if(idvalue.indexOf(":") > 0)
@@ -348,8 +519,50 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		}
 	}
 	
-	private String getBlockValueId(Short id, Byte value)
+	private static String getBlockValueId(Short id, Byte value)
 	{
 		return (value == 0) ? id.toString() : id.toString() + ":" + value.toString();
 	}
+	
+	public static short getBlockId(String block)
+	{
+		if(block.indexOf(":") > 0)
+		{
+			return Short.parseShort(block.split(":")[0]);
+		}
+		else
+		{
+			return Short.parseShort(block);
+		}
+	}
+	
+	public static byte getBlockValue(String block)
+	{
+		if(block.indexOf(":") > 0)
+		{
+			return Byte.parseByte(block.split(":")[1]);
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	public static String caption(String s)
+	{
+		if(captions.containsKey(s))
+		{
+			return addColor(captions.get(s));
+		}
+		else
+		{
+			logger.warning("[" + NAME + "] Missing caption: " + s);
+			return "ERROR:Missing caption '" + s + "'";
+		}
+	}
+	
+	public static String addColor(String string) 
+	{
+		return ChatColor.translateAlternateColorCodes('&', string);
+    }
 }

@@ -1,6 +1,7 @@
-package com.worldcretornica.plotme_core.api.v0_14;
+package com.worldcretornica.plotme_core.api.v0_14b;
 
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -69,4 +70,10 @@ public interface IPlotMe_GeneratorManager
 	public Location getPlotHome(World w, String id);
 	
 	public boolean isValidId(String id);
+	
+	public boolean createConfig(String worldname, Map<String, String> args, CommandSender cs);
+	
+	public Map<String, String> getDefaultGenerationConfig();
+	
+	public int getPlotSize(String worldname);
 }

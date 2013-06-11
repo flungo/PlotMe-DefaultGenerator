@@ -9,8 +9,8 @@ import org.bukkit.World;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
 
-import com.worldcretornica.plotme_core.api.v0_14.IPlotMe_ChunkGenerator;
-import com.worldcretornica.plotme_core.api.v0_14.IPlotMe_GeneratorManager;
+import com.worldcretornica.plotme_core.api.v0_14b.IPlotMe_ChunkGenerator;
+import com.worldcretornica.plotme_core.api.v0_14b.IPlotMe_GeneratorManager;
 
 public class PlotGen extends ChunkGenerator implements IPlotMe_ChunkGenerator
 {

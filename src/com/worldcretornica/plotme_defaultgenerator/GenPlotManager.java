@@ -1,6 +1,10 @@
 package com.worldcretornica.plotme_defaultgenerator;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +19,15 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Jukebox;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 
-import com.worldcretornica.plotme_core.api.v0_14.IPlotMe_GeneratorManager;
+import com.worldcretornica.plotme_core.api.v0_14b.IPlotMe_GeneratorManager;
 
 public class GenPlotManager implements IPlotMe_GeneratorManager
 {
@@ -33,7 +41,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 	public String getPlotId(Location loc)
 	{
 		GenMapInfo pmi = getMap(loc);
-		
+				
 		if(pmi != null)
 		{
 			int valx = loc.getBlockX();
@@ -115,7 +123,9 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 					return "";
 			}
 			else
+			{
 				return "" + x + ";" + z;
+			}
 		}
 		else
 		{
@@ -441,12 +451,14 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 	
 	public Location getTop(World w, String id)
 	{
-		return new Location(w, topX(id, w), w.getMaxHeight(), topZ(id, w));
+		//return new Location(w, topX(id, w), w.getMaxHeight(), topZ(id, w));
+		return getPlotTopLoc(w, id);
 	}
 	
 	public Location getBottom(World w, String id)
 	{
-		return new Location(w, bottomX(id, w), 0, bottomZ(id, w));
+		//return new Location(w, bottomX(id, w), 0, bottomZ(id, w));
+		return getPlotBottomLoc(w, id);
 	}
 	
 	public void clear(World w, String id)
@@ -455,7 +467,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 	}
 	
 	public void clear(Location bottom, Location top)
-	{
+	{		
 		GenMapInfo gmi = getMap(bottom);
 		
 		int bottomX = bottom.getBlockX();
@@ -475,7 +487,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 			for(int cz = minChunkZ; cz <= maxChunkZ; cz++)
 			{			
 				Chunk chunk = w.getChunkAt(cx, cz);
-				
+
 				for(Entity e : chunk.getEntities())
 				{
 					Location eloc = e.getLocation();
@@ -489,30 +501,39 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 			}
 		}
 
+		long t1 = Calendar.getInstance().getTimeInMillis();
+		long t2;
+		
+		int maxY = w.getMaxHeight();
+		
 		for(int x = bottomX; x <= topX; x++)
 		{
 			for(int z = bottomZ; z <= topZ; z++)
 			{
-				Block block = new Location(w, x, 0, z).getBlock();
+				Block block = w.getBlockAt(x, 0, z);
 				
 				block.setBiome(Biome.PLAINS);
 				
-				for(int y = w.getMaxHeight(); y >= 0; y--)
+				for(int y = maxY; y >= 0; y--)
 				{
-					block = new Location(w, x, y, z).getBlock();
-					
-					BlockState state = block.getState();
-					
-					if(state instanceof InventoryHolder)
+					block = w.getBlockAt(x, y, z);
+
+					if(block.getType() == Material.BEACON ||
+							block.getType() == Material.CHEST ||
+							block.getType() == Material.BREWING_STAND ||
+							block.getType() == Material.DISPENSER ||
+							block.getType() == Material.FURNACE ||
+							block.getType() == Material.DROPPER ||
+							block.getType() == Material.HOPPER)
 					{
-						InventoryHolder holder = (InventoryHolder) state;
+						InventoryHolder holder = (InventoryHolder) block.getState();
 						holder.getInventory().clear();
 					}
 					
 					
-					if(state instanceof Jukebox)
+					if(block.getType() == Material.JUKEBOX)
 					{
-						Jukebox jukebox = (Jukebox) state;
+						Jukebox jukebox = (Jukebox) block.getState();
 						//Remove once they fix the NullPointerException
 						try
 						{
@@ -539,12 +560,18 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 						}
 						else
 						{
-							block.setTypeIdAndData(0, (byte) 0, false); //.setType(Material.AIR);
+							//block.setTypeIdAndData(0, (byte) 0, false); //.setType(Material.AIR);
+							block.setType(Material.AIR);
 						}
 					}
 				}
 			}
 		}
+		
+		//t1 = Calendar.getInstance().getTimeInMillis();
+		t2 = Calendar.getInstance().getTimeInMillis();
+		
+		PlotMe_DefaultGenerator.logger.info("Time " + (t2-t1));
 	}
 
 	public void adjustPlotFor(World w, String id, boolean Claimed, boolean Protected, boolean Auctionned, boolean ForSale)
@@ -857,7 +884,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 
 	private GenMapInfo getMap(Block b) 
 	{
-		return getMap(b.getLocation());
+		return getMap(b.getWorld());
 	}
 	
 	private GenMapInfo getMap(World w) 
@@ -867,6 +894,133 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 
 	public GenMapInfo getMap(String worldname) 
 	{
-		return genplotmaps.get(worldname);
+		return genplotmaps.get(worldname.toLowerCase());
+	}
+	
+	public int getPlotSize(String worldname)
+	{
+		return getMap(worldname).PlotSize;
+	}
+
+	public boolean createConfig(String worldname, Map<String, String> args, CommandSender cs) 
+	{
+		FileConfiguration config = new YamlConfiguration();
+		File configfile = new File(PlotMe_DefaultGenerator.configpath, "config.yml");
+		try 
+		{
+			config.load(configfile);
+		} 
+		catch (FileNotFoundException e) {} 
+		catch (IOException e) 
+		{
+			PlotMe_DefaultGenerator.logger.severe(PlotMe_DefaultGenerator.PREFIX + "can't read configuration file");
+			e.printStackTrace();
+		} 
+		catch (InvalidConfigurationException e) 
+		{
+			PlotMe_DefaultGenerator.logger.severe(PlotMe_DefaultGenerator.PREFIX + "invalid configuration format");
+			e.printStackTrace();
+		}
+		
+		
+		ConfigurationSection worlds;
+		
+		if(!config.contains("worlds"))
+		{
+			worlds = config.createSection("worlds");
+		}
+		else
+		{
+			worlds = config.getConfigurationSection("worlds");
+		}
+		
+		GenMapInfo tempPlotInfo = new GenMapInfo();
+		ConfigurationSection currworld = worlds.getConfigurationSection(worldname);
+		
+		if(currworld == null)
+		{
+			currworld = worlds.createSection(worldname);
+		}
+		
+		tempPlotInfo.PathWidth = Integer.parseInt(args.get("PathWidth"));
+		tempPlotInfo.PlotSize = Integer.parseInt(args.get("PlotSize"));
+		
+		tempPlotInfo.XTranslation = Integer.parseInt(args.get("XTranslation"));
+		tempPlotInfo.ZTranslation = Integer.parseInt(args.get("ZTranslation"));
+		
+		tempPlotInfo.BottomBlockId = PlotMe_DefaultGenerator.getBlockId(args.get("BottomBlockId"));
+		tempPlotInfo.BottomBlockValue = PlotMe_DefaultGenerator.getBlockValue(args.get("BottomBlockId"));
+		tempPlotInfo.WallBlockId = PlotMe_DefaultGenerator.getBlockId(args.get("WallBlockId"));
+		tempPlotInfo.WallBlockValue = PlotMe_DefaultGenerator.getBlockValue(args.get("WallBlockId"));
+		tempPlotInfo.PlotFloorBlockId = PlotMe_DefaultGenerator.getBlockId(args.get("PlotFloorBlockId"));
+		tempPlotInfo.PlotFloorBlockValue = PlotMe_DefaultGenerator.getBlockValue(args.get("PlotFloorBlockId"));
+		tempPlotInfo.PlotFillingBlockId = PlotMe_DefaultGenerator.getBlockId(args.get("PlotFillingBlockId"));
+		tempPlotInfo.PlotFillingBlockValue = PlotMe_DefaultGenerator.getBlockValue(args.get("PlotFillingBlockId"));
+		tempPlotInfo.RoadMainBlockId = PlotMe_DefaultGenerator.getBlockId(args.get("RoadMainBlockId"));
+		tempPlotInfo.RoadMainBlockValue = PlotMe_DefaultGenerator.getBlockValue(args.get("RoadMainBlockId"));
+		tempPlotInfo.RoadStripeBlockId = PlotMe_DefaultGenerator.getBlockId(args.get("RoadStripeBlockId"));
+		tempPlotInfo.RoadStripeBlockValue = PlotMe_DefaultGenerator.getBlockValue(args.get("RoadStripeBlockId"));
+		
+		tempPlotInfo.RoadHeight = Integer.parseInt(args.get("RoadHeight"));
+
+		tempPlotInfo.ProtectedWallBlockId = args.get("ProtectedWallBlockId");
+		tempPlotInfo.ForSaleWallBlockId = args.get("ForSaleWallBlockId");
+		tempPlotInfo.AuctionWallBlockId = args.get("AuctionWallBlockId");
+					
+		currworld.set("PathWidth", Integer.parseInt(args.get("PathWidth")));
+		currworld.set("PlotSize", Integer.parseInt(args.get("PlotSize")));
+		currworld.set("XTranslation", Integer.parseInt(args.get("XTranslation")));
+		currworld.set("ZTranslation", Integer.parseInt(args.get("ZTranslation")));
+		currworld.set("BottomBlockId", args.get("BottomBlockId"));
+		currworld.set("WallBlockId", args.get("WallBlockId"));
+		currworld.set("PlotFloorBlockId", args.get("PlotFloorBlockId"));
+		currworld.set("PlotFillingBlockId", args.get("PlotFillingBlockId"));
+		currworld.set("RoadMainBlockId", args.get("RoadMainBlockId"));
+		currworld.set("RoadStripeBlockId", args.get("RoadStripeBlockId"));
+		
+		currworld.set("RoadHeight", Integer.parseInt(args.get("RoadHeight")));
+		currworld.set("WorldHeight", null);
+
+		currworld.set("ProtectedWallBlockId", tempPlotInfo.ProtectedWallBlockId);
+		currworld.set("ForSaleWallBlockId", tempPlotInfo.ForSaleWallBlockId);
+		currworld.set("AuctionWallBlockId", tempPlotInfo.AuctionWallBlockId);
+		
+		worlds.set(worldname, currworld);
+		
+		genplotmaps.put(worldname.toLowerCase(), tempPlotInfo);
+		
+		try 
+		{
+			config.save(configfile);
+		} 
+		catch (IOException e) 
+		{
+			PlotMe_DefaultGenerator.logger.severe(PlotMe_DefaultGenerator.PREFIX + "error writting configurations");
+			e.printStackTrace();
+		}
+		
+		return true;
+	}
+
+	public Map<String, String> getDefaultGenerationConfig() 
+	{
+		Map<String, String> parameters = new HashMap<String, String>();
+		
+		parameters.put("PathWidth", "7");
+		parameters.put("PlotSize", "32");
+		parameters.put("RoadHeight", "64");
+		parameters.put("BottomBlockId", "7");
+		parameters.put("WallBlockId", "44");
+		parameters.put("PlotFloorBlockId", "2");
+		parameters.put("PlotFillingBlockId", "3");
+		parameters.put("RoadMainBlockId", "5");
+		parameters.put("RoadStripeBlockId", "5:2");
+		parameters.put("XTranslation", "0");
+		parameters.put("ZTranslation", "0");
+		parameters.put("ProtectedWallBlockId", "44:4");
+		parameters.put("ForSaleWallBlockId", "44:1");
+		parameters.put("AuctionWallBlockId", "44:1");
+		
+		return parameters;
 	}
 }
