@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -31,6 +33,61 @@ import com.worldcretornica.plotme_core.api.v0_14b.IPlotMe_GeneratorManager;
 
 public class GenPlotManager implements IPlotMe_GeneratorManager
 {
+	private static final Set<Integer> blockPlacedLast = new HashSet<Integer>();
+    static {
+    	blockPlacedLast.add(Material.SAPLING.getId());
+    	blockPlacedLast.add(Material.BED.getId());
+    	blockPlacedLast.add(Material.POWERED_RAIL.getId());
+    	blockPlacedLast.add(Material.DETECTOR_RAIL.getId());
+    	blockPlacedLast.add(Material.LONG_GRASS.getId());
+    	blockPlacedLast.add(Material.DEAD_BUSH.getId());
+        blockPlacedLast.add(Material.PISTON_EXTENSION.getId());
+        blockPlacedLast.add(Material.YELLOW_FLOWER.getId());
+        blockPlacedLast.add(Material.RED_ROSE.getId());
+        blockPlacedLast.add(Material.BROWN_MUSHROOM.getId());
+        blockPlacedLast.add(Material.RED_MUSHROOM.getId());
+        blockPlacedLast.add(Material.TORCH.getId());
+        blockPlacedLast.add(Material.FIRE.getId());
+        blockPlacedLast.add(Material.REDSTONE_WIRE.getId());
+        blockPlacedLast.add(Material.CROPS.getId());
+        blockPlacedLast.add(Material.LADDER.getId());
+        blockPlacedLast.add(Material.RAILS.getId());
+        blockPlacedLast.add(Material.LEVER.getId());
+        blockPlacedLast.add(Material.STONE_PLATE.getId());
+        blockPlacedLast.add(Material.WOOD_PLATE.getId());
+        blockPlacedLast.add(Material.REDSTONE_TORCH_OFF.getId());
+        blockPlacedLast.add(Material.REDSTONE_TORCH_ON.getId());
+        blockPlacedLast.add(Material.STONE_BUTTON.getId());
+        blockPlacedLast.add(Material.SNOW.getId());
+        blockPlacedLast.add(Material.PORTAL.getId());
+        blockPlacedLast.add(Material.DIODE_BLOCK_OFF.getId());
+        blockPlacedLast.add(Material.DIODE_BLOCK_ON.getId());
+        blockPlacedLast.add(Material.TRAP_DOOR.getId());
+        blockPlacedLast.add(Material.VINE.getId());
+        blockPlacedLast.add(Material.WATER_LILY.getId());
+        blockPlacedLast.add(Material.NETHER_WARTS.getId());
+        blockPlacedLast.add(Material.PISTON_BASE.getId());
+        blockPlacedLast.add(Material.PISTON_STICKY_BASE.getId());
+        blockPlacedLast.add(Material.PISTON_EXTENSION.getId());
+        blockPlacedLast.add(Material.PISTON_MOVING_PIECE.getId());
+        blockPlacedLast.add(Material.COCOA.getId());
+        blockPlacedLast.add(Material.TRIPWIRE_HOOK.getId());
+        blockPlacedLast.add(Material.TRIPWIRE.getId());
+        blockPlacedLast.add(Material.FLOWER_POT.getId());
+        blockPlacedLast.add(Material.CARROT.getId());
+        blockPlacedLast.add(Material.POTATO.getId());
+        blockPlacedLast.add(Material.WOOD_BUTTON.getId());
+        blockPlacedLast.add(Material.SKULL.getId());
+        blockPlacedLast.add(Material.GOLD_PLATE.getId());
+        blockPlacedLast.add(Material.IRON_PLATE.getId());
+        blockPlacedLast.add(Material.REDSTONE_COMPARATOR_OFF.getId());
+        blockPlacedLast.add(Material.REDSTONE_COMPARATOR_ON.getId());
+        blockPlacedLast.add(Material.ACTIVATOR_RAIL.getId());
+    }
+	
+			
+	
+	
 	public Map<String, GenMapInfo> genplotmaps;
 	
 	public GenPlotManager()
@@ -687,7 +744,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 	}
 	
 	public boolean movePlot(World wFrom, World wTo, String idFrom, String idTo)
-	{
+	{	
 		Location plot1Bottom = getPlotBottomLoc(wFrom, idFrom);
 		Location plot2Bottom = getPlotBottomLoc(wTo, idTo);
 		Location plot1Top = getPlotTopLoc(wFrom, idFrom);
@@ -695,12 +752,14 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 		int distanceX = plot1Bottom.getBlockX() - plot2Bottom.getBlockX();
 		int distanceZ = plot1Bottom.getBlockZ() - plot2Bottom.getBlockZ();
 		
+		Set<BlockInfo> lastblocks = new HashSet<BlockInfo>();
+		
 		for(int x = plot1Bottom.getBlockX(); x <= plot1Top.getBlockX(); x++)
 		{
 			for(int z = plot1Bottom.getBlockZ(); z <= plot1Top.getBlockZ(); z++)
 			{
-				Block plot1Block = new Location(wFrom, x, 0, z).getBlock();
-				Block plot2Block = new Location(wTo, x - distanceX, 0, z - distanceZ).getBlock();
+				Block plot1Block = wFrom.getBlockAt(x, 0, z);
+				Block plot2Block = wTo.getBlockAt(x - distanceX, 0, z - distanceZ);
 				
 				String plot1Biome = plot1Block.getBiome().name();
 				String plot2Biome = plot2Block.getBiome().name();
@@ -710,23 +769,46 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 				
 				for(int y = 0; y < wFrom.getMaxHeight() ; y++)
 				{
-					plot1Block = new Location(wFrom, x, y, z).getBlock();
+					plot1Block = wFrom.getBlockAt(x, y, z);
 					int plot1Type = plot1Block.getTypeId();
 					byte plot1Data = plot1Block.getData();
 					
-					plot2Block = new Location(wTo, x - distanceX, y, z - distanceZ).getBlock();
+					plot2Block = wTo.getBlockAt(x - distanceX, y, z - distanceZ);
 					int plot2Type = plot2Block.getTypeId();
 					byte plot2Data = plot2Block.getData();
 					
-					plot1Block.setTypeIdAndData(plot2Type, plot2Data, false);
-					plot1Block.setData(plot2Data);
+					if(!blockPlacedLast.contains(plot2Type))
+					{
+						plot1Block.setTypeIdAndData(plot2Type, plot2Data, false);
+					}
+					else
+					{
+						plot1Block.setTypeId(0, false);
+						lastblocks.add(new BlockInfo(wFrom, x, y, z, plot2Type, plot2Data));
+					}
 					
-					plot2Block.setTypeIdAndData(plot1Type, plot1Data, false);
-					plot2Block.setData(plot1Data);
+					if(!blockPlacedLast.contains(plot1Type))
+					{
+						plot2Block.setTypeIdAndData(plot1Type, plot1Data, false);
+					}
+					else
+					{
+						plot2Block.setTypeId(0, false);
+						lastblocks.add(new BlockInfo(wTo, x - distanceX, y, z - distanceZ, plot1Type, plot1Data));
+					}
 				}
 			}
 		}
 		
+		for(BlockInfo bi : lastblocks)
+		{
+			Block block = bi.w.getBlockAt(bi.x, bi.y, bi.z);
+			block.setTypeIdAndData(bi.id, bi.data, false);
+		}
+		
+		lastblocks.clear();
+		lastblocks = null;
+
 		return true;
 	}
 	

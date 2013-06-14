@@ -99,7 +99,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		
 		CreateConfig(filelang, properties, "PlotMe Caption configuration αω");
 		
-		if (language != "english")
+		if (language != null && !language.equals("english"))
 		{
 			filelang = new File(configpath, "caption-" + language + ".yml");
 			CreateConfig(filelang, properties, "PlotMe DefaultGenerator Caption configuration");
