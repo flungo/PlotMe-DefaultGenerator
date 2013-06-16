@@ -50,6 +50,8 @@ public interface IPlotMe_GeneratorManager
 	
 	public void clear(World w, String id);
 	public void clear(Location bottom, Location top);
+	public Long[] clear(Location bottom, Location top, long maxBlocks, boolean clearEntities, Long[] start);
+	public Long[] clear(World w, String id, long maxBlocks, boolean clearEntities, Long[] start);
 	
 	public void adjustPlotFor(World w, String id, boolean Claimed, boolean Protect, boolean Auctionned, boolean ForSale);
 	

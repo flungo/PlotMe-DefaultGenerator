@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,9 +13,11 @@ import java.util.Set;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Rotation;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Jukebox;
 import org.bukkit.block.Sign;
@@ -26,8 +27,12 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.Painting;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 
 import com.worldcretornica.plotme_core.api.v0_14b.IPlotMe_GeneratorManager;
 
@@ -523,6 +528,11 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 		clear(getBottom(w, id), getTop(w, id));
 	}
 	
+	public Long[] clear(World w, String id, long maxBlocks, boolean clearEntities, Long[] start)
+	{
+		return clear(getBottom(w, id), getTop(w, id), maxBlocks, clearEntities, start);
+	}
+	
 	public void clear(Location bottom, Location top)
 	{		
 		GenMapInfo gmi = getMap(bottom);
@@ -532,34 +542,9 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 		int bottomZ = bottom.getBlockZ();
 		int topZ = top.getBlockZ();
 		
-		int minChunkX = (int) Math.floor((double) bottomX / 16);
-		int maxChunkX = (int) Math.floor((double) topX / 16);
-		int minChunkZ = (int) Math.floor((double) bottomZ / 16);
-		int maxChunkZ = (int) Math.floor((double) topZ / 16);
-		
 		World w = bottom.getWorld();
 		
-		for(int cx = minChunkX; cx <= maxChunkX; cx++)
-		{			
-			for(int cz = minChunkZ; cz <= maxChunkZ; cz++)
-			{			
-				Chunk chunk = w.getChunkAt(cx, cz);
-
-				for(Entity e : chunk.getEntities())
-				{
-					Location eloc = e.getLocation();
-					
-					if(!(e instanceof Player) && eloc.getBlockX() >= bottom.getBlockX() && eloc.getBlockX() <= top.getBlockX() &&
-							eloc.getBlockZ() >= bottom.getBlockZ() && eloc.getBlockZ() <= top.getBlockZ())
-					{
-						e.remove();
-					}
-				}
-			}
-		}
-
-		long t1 = Calendar.getInstance().getTimeInMillis();
-		long t2;
+		clearEntities(bottom, top);
 		
 		int maxY = w.getMaxHeight();
 		
@@ -624,12 +609,157 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 				}
 			}
 		}
-		
-		//t1 = Calendar.getInstance().getTimeInMillis();
-		t2 = Calendar.getInstance().getTimeInMillis();
-		
-		PlotMe_DefaultGenerator.logger.info("Time " + (t2-t1));
 	}
+	
+	public void clearEntities(Location bottom, Location top)
+	{
+		int bottomX = bottom.getBlockX();
+		int topX = top.getBlockX();
+		int bottomZ = bottom.getBlockZ();
+		int topZ = top.getBlockZ();
+		
+		World w = bottom.getWorld();
+		
+		int minChunkX = (int) Math.floor((double) bottomX / 16);
+		int maxChunkX = (int) Math.floor((double) topX / 16);
+		int minChunkZ = (int) Math.floor((double) bottomZ / 16);
+		int maxChunkZ = (int) Math.floor((double) topZ / 16);
+
+		for(int cx = minChunkX; cx <= maxChunkX; cx++)
+		{			
+			for(int cz = minChunkZ; cz <= maxChunkZ; cz++)
+			{			
+				Chunk chunk = w.getChunkAt(cx, cz);
+
+				for(Entity e : chunk.getEntities())
+				{
+					Location eloc = e.getLocation();
+					
+					if(!(e instanceof Player) && eloc.getBlockX() >= bottom.getBlockX() && eloc.getBlockX() <= top.getBlockX() &&
+							eloc.getBlockZ() >= bottom.getBlockZ() && eloc.getBlockZ() <= top.getBlockZ())
+					{
+						e.remove();
+					}
+				}
+			}
+		}
+	}
+	
+	public Long[] clear(Location bottom, Location top, long maxBlocks, boolean clearEntities, Long[] start)
+	{		
+		if(clearEntities)
+		{
+			clearEntities(bottom, top);
+		}
+		
+		GenMapInfo gmi = getMap(bottom);
+		
+		int bottomX = 0;
+		int topX = top.getBlockX();
+		int bottomZ = 0;
+		int topZ = top.getBlockZ();
+		int maxY = 0;
+		
+		long nbBlockCleared = 0;
+		long nbBlockClearedBefore = 0;
+		
+		World w = bottom.getWorld();
+		
+		if(start == null)
+		{
+			bottomX = bottom.getBlockX();
+			maxY = w.getMaxHeight();
+			bottomZ = bottom.getBlockZ();
+		}
+		else
+		{
+			bottomX = start[0].intValue();
+			maxY = start[1].intValue();
+			bottomZ = start[2].intValue();
+			nbBlockClearedBefore = start[3];
+		}
+		
+		for(int x = bottomX; x <= topX; x++)
+		{
+			for(int z = bottomZ; z <= topZ; z++)
+			{
+				Block block = w.getBlockAt(x, 0, z);
+				
+				block.setBiome(Biome.PLAINS);
+				
+				for(int y = maxY; y >= 0; y--)
+				{
+					block = w.getBlockAt(x, y, z);
+
+					if(block.getType() == Material.BEACON ||
+							block.getType() == Material.CHEST ||
+							block.getType() == Material.BREWING_STAND ||
+							block.getType() == Material.DISPENSER ||
+							block.getType() == Material.FURNACE ||
+							block.getType() == Material.DROPPER ||
+							block.getType() == Material.HOPPER)
+					{
+						InventoryHolder holder = (InventoryHolder) block.getState();
+						holder.getInventory().clear();
+					}
+					
+					
+					if(block.getType() == Material.JUKEBOX)
+					{
+						Jukebox jukebox = (Jukebox) block.getState();
+						//Remove once they fix the NullPointerException
+						try
+						{
+							jukebox.setPlaying(Material.AIR);
+						}catch(Exception e){}
+					}
+					
+										
+					if(y == 0)
+					{
+						block.setTypeId(gmi.BottomBlockId);
+					}
+					else if(y < gmi.RoadHeight)
+					{
+						block.setTypeId(gmi.PlotFillingBlockId);
+					}
+					else if(y == gmi.RoadHeight)
+					{
+						block.setTypeId(gmi.PlotFloorBlockId);
+					}
+					else
+					{
+						if(y == (gmi.RoadHeight + 1) && 
+								(x == bottomX - 1 || 
+								 x == topX + 1 ||
+								 z == bottomZ - 1 || 
+								 z == topZ + 1))
+						{
+							//block.setTypeId(pmi.WallBlockId);
+						}
+						else
+						{
+							//block.setTypeIdAndData(0, (byte) 0, false); //.setType(Material.AIR);
+							block.setType(Material.AIR);
+						}
+					}
+					
+					nbBlockCleared++;
+					
+					if(nbBlockCleared >= maxBlocks)
+					{
+						return new Long[]{(long) x,(long) y,(long) z, nbBlockClearedBefore + nbBlockCleared};
+					}
+				}
+				maxY = w.getMaxHeight();
+			}
+			bottomZ = bottom.getBlockZ();
+		}
+		
+		return null;
+	}
+	
+	
 
 	public void adjustPlotFor(World w, String id, boolean Claimed, boolean Protected, boolean Auctionned, boolean ForSale)
 	{
@@ -748,15 +878,21 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 		Location plot1Bottom = getPlotBottomLoc(wFrom, idFrom);
 		Location plot2Bottom = getPlotBottomLoc(wTo, idTo);
 		Location plot1Top = getPlotTopLoc(wFrom, idFrom);
+		Location plot2Top = getPlotTopLoc(wTo, idTo);
 		
 		int distanceX = plot1Bottom.getBlockX() - plot2Bottom.getBlockX();
 		int distanceZ = plot1Bottom.getBlockZ() - plot2Bottom.getBlockZ();
 		
 		Set<BlockInfo> lastblocks = new HashSet<BlockInfo>();
 		
-		for(int x = plot1Bottom.getBlockX(); x <= plot1Top.getBlockX(); x++)
+		int bottomX = plot1Bottom.getBlockX();
+		int topX = plot1Top.getBlockX();
+		int bottomZ = plot1Bottom.getBlockZ();
+		int topZ = plot1Top.getBlockZ();
+		
+		for(int x = bottomX; x <= topX; x++)
 		{
-			for(int z = plot1Bottom.getBlockZ(); z <= plot1Top.getBlockZ(); z++)
+			for(int z = bottomZ; z <= topZ; z++)
 			{
 				Block plot1Block = wFrom.getBlockAt(x, 0, z);
 				Block plot2Block = wTo.getBlockAt(x - distanceX, 0, z - distanceZ);
@@ -808,6 +944,119 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 		
 		lastblocks.clear();
 		lastblocks = null;
+		
+		//Move entities
+		
+		int minChunkX1 = (int) Math.floor((double) bottomX / 16);
+		int maxChunkX1 = (int) Math.floor((double) topX / 16);
+		int minChunkZ1 = (int) Math.floor((double) bottomZ / 16);
+		int maxChunkZ1 = (int) Math.floor((double) topZ / 16);
+		
+		int minChunkX2 = (int) Math.floor((double) (bottomX - distanceX) / 16);
+		int maxChunkX2 = (int) Math.floor((double) (topX - distanceX) / 16);
+		int minChunkZ2 = (int) Math.floor((double) (bottomZ - distanceZ) / 16);
+		int maxChunkZ2 = (int) Math.floor((double) (topZ - distanceZ) / 16);
+		
+		Set<Entity> entities1 = new HashSet<Entity>();
+		Set<Entity> entities2 = new HashSet<Entity>();
+				
+		for(int cx = minChunkX1; cx <= maxChunkX1; cx++)
+		{			
+			for(int cz = minChunkZ1; cz <= maxChunkZ1; cz++)
+			{			
+				Chunk chunk = wFrom.getChunkAt(cx, cz);
+
+				for(Entity e : chunk.getEntities())
+				{
+					Location eloc = e.getLocation();
+					
+					if(!(e instanceof Player) /*&& !(e instanceof Hanging)*/ && eloc.getBlockX() >= plot1Bottom.getBlockX() && eloc.getBlockX() <= plot1Top.getBlockX() &&
+							eloc.getBlockZ() >= plot1Bottom.getBlockZ() && eloc.getBlockZ() <= plot1Top.getBlockZ())
+					{
+						entities1.add(e);
+					}
+				}
+			}
+		}
+		
+		for(int cx = minChunkX2; cx <= maxChunkX2; cx++)
+		{			
+			for(int cz = minChunkZ2; cz <= maxChunkZ2; cz++)
+			{			
+				Chunk chunk = wFrom.getChunkAt(cx, cz);
+
+				for(Entity e : chunk.getEntities())
+				{
+					Location eloc = e.getLocation();
+					
+					if(!(e instanceof Player) /*&& !(e instanceof Hanging)*/ && eloc.getBlockX() >= plot2Bottom.getBlockX() && eloc.getBlockX() <= plot2Top.getBlockX() &&
+							eloc.getBlockZ() >= plot2Bottom.getBlockZ() && eloc.getBlockZ() <= plot2Top.getBlockZ())
+					{
+						entities2.add(e);
+					}
+				}
+			}
+		}
+		
+		for(Entity e: entities1)
+		{
+			Location l = e.getLocation();
+			Location newl = new Location(wTo, l.getX() - distanceX, l.getY(), l.getZ() - distanceZ);
+			
+			if(e.getType() == EntityType.ITEM_FRAME)
+			{				
+				BlockFace bf = ((ItemFrame) e).getFacing();
+				ItemStack is = ((ItemFrame) e).getItem();
+				Rotation rot = ((ItemFrame) e).getRotation();
+				
+				e.teleport(newl);
+				((ItemFrame) e).setItem(is);
+				((ItemFrame) e).setRotation(rot);
+				((ItemFrame) e).setFacingDirection(bf, true);
+				
+				
+			}
+			else if(e.getType() == EntityType.PAINTING)
+			{				
+				BlockFace bf = ((Painting) e).getFacing();
+				
+				e.teleport(newl);
+				((Painting) e).setFacingDirection(bf, true);
+			}
+			else
+			{
+				e.teleport(newl);
+			}
+		}
+		
+		for(Entity e: entities2)
+		{
+			Location l = e.getLocation();
+			Location newl = new Location(wFrom, l.getX() + distanceX, l.getY(), l.getZ() + distanceZ);
+
+			if(e.getType() == EntityType.ITEM_FRAME)
+			{			
+				BlockFace bf = ((ItemFrame) e).getFacing();
+				ItemStack is = ((ItemFrame) e).getItem();
+				Rotation rot = ((ItemFrame) e).getRotation();
+				
+				e.teleport(newl);
+				((ItemFrame) e).setItem(is);
+				((ItemFrame) e).setRotation(rot);
+				((ItemFrame) e).setFacingDirection(bf, true);
+				
+			}
+			else if(e.getType() == EntityType.PAINTING)
+			{				
+				BlockFace bf = ((Painting) e).getFacing();
+				e.teleport(newl);
+				((Painting) e).setFacingDirection(bf, true);
+			}
+			else
+			{
+				e.teleport(newl);
+			}
+		}
 
 		return true;
 	}
@@ -1070,6 +1319,8 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 		worlds.set(worldname, currworld);
 		
 		genplotmaps.put(worldname.toLowerCase(), tempPlotInfo);
+		
+		config.set("worlds", worlds);
 		
 		try 
 		{
