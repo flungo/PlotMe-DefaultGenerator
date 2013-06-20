@@ -1,6 +1,6 @@
 name: PlotMe-DefaultGenerator
 main: com.worldcretornica.plotme_defaultgenerator.PlotMe_DefaultGenerator
-version: '0.14.1'
+version: '0.14.2'
 author: ZachBora
 load: startup
 website: http://dev.bukkit.org/server-mods/plotme/

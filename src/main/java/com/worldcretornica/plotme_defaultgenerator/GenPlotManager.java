@@ -602,7 +602,6 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 						}
 						else
 						{
-							//block.setTypeIdAndData(0, (byte) 0, false); //.setType(Material.AIR);
 							block.setType(Material.AIR);
 						}
 					}
@@ -674,7 +673,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 		else
 		{
 			bottomX = start[0].intValue();
-			maxY = start[1].intValue();
+			maxY = start[1].intValue() - 1;
 			bottomZ = start[2].intValue();
 			nbBlockClearedBefore = start[3];
 		}
