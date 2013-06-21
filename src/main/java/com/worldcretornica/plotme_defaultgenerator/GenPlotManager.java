@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.Art;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -1003,24 +1004,26 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 			Location newl = new Location(wTo, l.getX() - distanceX, l.getY(), l.getZ() - distanceZ);
 			
 			if(e.getType() == EntityType.ITEM_FRAME)
-			{				
-				BlockFace bf = ((ItemFrame) e).getFacing();
-				ItemStack is = ((ItemFrame) e).getItem();
-				Rotation rot = ((ItemFrame) e).getRotation();
+			{
+				ItemFrame i = ((ItemFrame) e);
+				BlockFace bf = i.getFacing();
+				ItemStack is = i.getItem();
+				Rotation rot = i.getRotation();
 				
-				e.teleport(newl);
-				((ItemFrame) e).setItem(is);
-				((ItemFrame) e).setRotation(rot);
-				((ItemFrame) e).setFacingDirection(bf, true);
-				
-				
+				i.teleport(newl);
+				i.setItem(is);
+				i.setRotation(rot);
+				i.setFacingDirection(bf, true);
 			}
 			else if(e.getType() == EntityType.PAINTING)
-			{				
-				BlockFace bf = ((Painting) e).getFacing();
-				
-				e.teleport(newl);
-				((Painting) e).setFacingDirection(bf, true);
+			{
+				Painting p = ((Painting) e);
+				BlockFace bf = p.getFacing();
+				int[] mod = getPaintingMod(p.getArt(), bf);
+				if(mod != null)
+					newl = newl.add(mod[0], mod[1], mod[2]);
+				p.teleport(newl);
+				p.setFacingDirection(bf, true);
 			}
 			else
 			{
@@ -1035,21 +1038,26 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 
 			if(e.getType() == EntityType.ITEM_FRAME)
 			{			
-				BlockFace bf = ((ItemFrame) e).getFacing();
-				ItemStack is = ((ItemFrame) e).getItem();
-				Rotation rot = ((ItemFrame) e).getRotation();
+				ItemFrame i = ((ItemFrame) e);
+				BlockFace bf = i.getFacing();
+				ItemStack is = i.getItem();
+				Rotation rot = i.getRotation();
 				
-				e.teleport(newl);
-				((ItemFrame) e).setItem(is);
-				((ItemFrame) e).setRotation(rot);
-				((ItemFrame) e).setFacingDirection(bf, true);
+				i.teleport(newl);
+				i.setItem(is);
+				i.setRotation(rot);
+				i.setFacingDirection(bf, true);
 				
 			}
 			else if(e.getType() == EntityType.PAINTING)
 			{				
-				BlockFace bf = ((Painting) e).getFacing();
-				e.teleport(newl);
-				((Painting) e).setFacingDirection(bf, true);
+				Painting p = ((Painting) e);
+				BlockFace bf = p.getFacing();
+				int[] mod = getPaintingMod(p.getArt(), bf);
+				if(mod != null)
+					newl = newl.add(mod[0], mod[1], mod[2]);
+				p.teleport(newl);
+				p.setFacingDirection(bf, true);
 			}
 			else
 			{
@@ -1337,7 +1345,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 	public Map<String, String> getDefaultGenerationConfig() 
 	{
 		Map<String, String> parameters = new HashMap<String, String>();
-		
+
 		parameters.put("PathWidth", "7");
 		parameters.put("PlotSize", "32");
 		parameters.put("RoadHeight", "64");
@@ -1354,5 +1362,47 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 		parameters.put("AuctionWallBlockId", "44:1");
 		
 		return parameters;
+	}
+	
+	private int[] getPaintingMod(Art a, BlockFace bf)
+	{
+		int H = a.getBlockHeight();
+		int W = a.getBlockWidth();
+		
+		//Same for all faces
+		if(H == 2 && W == 1)
+			return new int[]{0,-1,0};
+		
+		switch(bf)
+		{
+		case WEST:
+			if(H == 3 && W == 4 || H == 1 && W == 2)
+				return new int[]{0,0,-1};
+			else if (H == 2 && W == 2 || H == 4 && W == 4 || H == 2 && W == 4)
+				return new int[]{0,-1,-1};
+			
+			break;
+		case SOUTH:
+			if(H == 3 && W == 4 || H == 1 && W == 2)
+				return new int[]{-1,0,0};
+			else if (H == 2 && W == 2 || H == 4 && W == 4 || H == 2 && W == 4)
+				return new int[]{-1,-1,0};
+			
+			break;
+		case EAST:
+			if (H == 2 && W == 2 || H == 4 && W == 4 || H == 2 && W == 4)
+				return new int[]{0,-1,0};
+			
+			break;
+		case NORTH:
+			if (H == 2 && W == 2 || H == 4 && W == 4 || H == 2 && W == 4)
+				return new int[]{0,-1,0};
+			
+			break;
+		default:
+			return new int[]{0,0,0};
+		}
+		
+		return new int[]{0,0,0};
 	}
 }
