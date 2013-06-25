@@ -24,9 +24,11 @@ public class PlotGen extends ChunkGenerator implements IPlotMe_ChunkGenerator
 	private short floor2;
 	private int roadheight;
 	private GenMapInfo temppmi;
+	private PlotMe_DefaultGenerator plugin = null;
 	
-	public PlotGen()
+	public PlotGen(PlotMe_DefaultGenerator instance)
 	{
+		plugin = instance;
 		plotsize = 32;
 		pathsize = 7;
 		bottom = 7;
@@ -39,8 +41,9 @@ public class PlotGen extends ChunkGenerator implements IPlotMe_ChunkGenerator
 		temppmi = null;
 	}
 	
-	public PlotGen(GenMapInfo pmi)
+	public PlotGen(PlotMe_DefaultGenerator instance, GenMapInfo pmi)
 	{
+		plugin = instance;
 		plotsize = pmi.PlotSize;
 		pathsize = pmi.PathWidth;
 		bottom = pmi.BottomBlockId;
@@ -316,6 +319,6 @@ public class PlotGen extends ChunkGenerator implements IPlotMe_ChunkGenerator
 
 	public IPlotMe_GeneratorManager getManager() 
 	{
-		return PlotMe_DefaultGenerator.getGenPlotManager();
+		return plugin.getGenPlotManager();
 	}
 }

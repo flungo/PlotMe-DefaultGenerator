@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
-
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -28,36 +26,29 @@ import com.worldcretornica.plotme_defaultgenerator.PlotGen;
 
 public class PlotMe_DefaultGenerator extends JavaPlugin
 {
-	public static String NAME;
-	public static String PREFIX;
-	public static String VERSION;
-	public static String WEBSITE;
+	public String PREFIX;
+	public String VERSION;
 	
-	public static String language;
-	
-	public static Logger logger = Logger.getLogger("Minecraft");
+	public String language;
 		
-	public static String configpath;
-    public static Boolean advancedlogging;
+	private String configpath;
+    private Boolean advancedlogging;
     
-    public static Boolean usinglwc = false;
+    public Boolean usinglwc = false;
     
-    private static HashMap<String, String> captions;
+    private HashMap<String, String> captions;
     
-    private static GenPlotManager genPlotManager;
+    private GenPlotManager genPlotManager;
     
     public void onDisable()
     {
     	captions = null;
     	genPlotManager = null;
     	usinglwc = null;
-    	advancedlogging = null;
-    	configpath = null;
-    	logger = null;
-    	NAME = null;
+    	setAdvancedLogging(null);
+    	setConfigPath(null);
     	PREFIX = null;
     	VERSION = null;
-    	WEBSITE = null;
     }
     
 	public void onEnable()
@@ -69,7 +60,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 	
 	private void loadCaptions() 
 	{
-		File filelang = new File(configpath, "caption-english.yml");
+		File filelang = new File(getConfigPath(), "caption-english.yml");
 		TreeMap<String, String> properties = new TreeMap<String, String>();
 		
 		//properties.put("MsgStartDeleteSession","Starting delete session");
@@ -101,7 +92,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		
 		if (language != null && !language.equals("english"))
 		{
-			filelang = new File(configpath, "caption-" + language + ".yml");
+			filelang = new File(getConfigPath(), "caption-" + language + ".yml");
 			CreateConfig(filelang, properties, "PlotMe DefaultGenerator Caption configuration");
 		}
 		
@@ -125,10 +116,10 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 				}
 		    }
 		} catch (FileNotFoundException e) {
-			logger.severe("[" + NAME + "] File not found: " + e.getMessage());
+			getLogger().severe("[" + getName() + "] File not found: " + e.getMessage());
 			e.printStackTrace();
 		} catch (Exception e) {
-			logger.severe("[" + NAME + "] Error with configuration: " + e.getMessage());
+			getLogger().severe("[" + getName() + "] Error with configuration: " + e.getMessage());
 			e.printStackTrace();
 		} finally {                      
 			if (input != null) try {
@@ -144,7 +135,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 			BufferedWriter writer = null;
 			
 			try{
-				File dir = new File(configpath, "");
+				File dir = new File(getConfigPath(), "");
 				dir.mkdirs();			
 				
 				writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8"));
@@ -157,8 +148,8 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 				
 				writer.close();
 			}catch (IOException e){
-				logger.severe("[" + NAME + "] Unable to create config file : " + Title + "!");
-				logger.severe(e.getMessage());
+				getLogger().severe("[" + getName() + "] Unable to create config file : " + Title + "!");
+				getLogger().severe(e.getMessage());
 			} finally {                      
 				if (writer != null) try {
 					writer.close();
@@ -193,10 +184,10 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 					input.close();
 			    }
 			} catch (FileNotFoundException e) {
-				logger.severe("[" + NAME + "] File not found: " + e.getMessage());
+				getLogger().severe("[" + getName() + "] File not found: " + e.getMessage());
 				e.printStackTrace();
 			} catch (Exception e) {
-				logger.severe("[" + NAME + "] Error with configuration: " + e.getMessage());
+				getLogger().severe("[" + getName() + "] Error with configuration: " + e.getMessage());
 				e.printStackTrace();
 			} finally {                      
 				if (writer != null) try {
@@ -209,7 +200,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		}
 	}
 
-	public static GenPlotManager getGenPlotManager()
+	public GenPlotManager getGenPlotManager()
 	{
 		return genPlotManager;
 	}
@@ -219,11 +210,11 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		String map = worldname.toLowerCase();
 		if(genPlotManager.genplotmaps.containsKey(map))
 		{
-			return new PlotGen(genPlotManager.getMap(map));
+			return new PlotGen(this, genPlotManager.getMap(map));
 		}
 		else
 		{
-			return new PlotGen();
+			return new PlotGen(this);
 		}
 	}
 	
@@ -240,7 +231,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		
 		if(oldfile.exists())
 		{
-			logger.info(PREFIX + "Importing old configurations");
+			getLogger().info(PREFIX + "Importing old configurations");
 			FileConfiguration oldconfig = new YamlConfiguration();
 			FileConfiguration newconfig = new YamlConfiguration();
 			
@@ -254,13 +245,13 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 			} 
 			catch (IOException e) 
 			{
-				logger.severe(PREFIX + "can't read old configuration file");
+				getLogger().severe(PREFIX + "can't read old configuration file");
 				e.printStackTrace();
 				return;
 			} 
 			catch (InvalidConfigurationException e) 
 			{
-				logger.severe(PREFIX + "invalid old configuration format");
+				getLogger().severe(PREFIX + "invalid old configuration format");
 				e.printStackTrace();
 				return;
 			}
@@ -336,7 +327,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 			} 
 			catch (IOException e) 
 			{
-				logger.severe(PREFIX + "error writting configurations");
+				getLogger().severe(PREFIX + "error writting configurations");
 				e.printStackTrace();
 				return;
 			}
@@ -346,22 +337,20 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 	public void initialize()
 	{
 		PluginDescriptionFile pdfFile = this.getDescription();
-		NAME = pdfFile.getName();
-		PREFIX = ChatColor.BLUE + "[" + NAME + "] " + ChatColor.RESET;
+		PREFIX = ChatColor.BLUE + "[" + getName() + "] " + ChatColor.RESET;
 		VERSION = pdfFile.getVersion();
-		WEBSITE = pdfFile.getWebsite();
-		configpath = getDataFolder().getParentFile().getAbsolutePath() + "/PlotMe/" + NAME;
+		setConfigPath(getDataFolder().getParentFile().getAbsolutePath() + "/PlotMe/" + getName());
 		
-		File configfolder = new File(configpath);
+		File configfolder = new File(getConfigPath());
 		
 		if(!configfolder.exists()) 
 		{
 			configfolder.mkdirs();
         }
 		
-		genPlotManager = new GenPlotManager();
+		genPlotManager = new GenPlotManager(this);
 				
-		File configfile = new File(configpath, "config.yml");
+		File configfile = new File(getConfigPath(), "config.yml");
 		
 		if(!configfile.exists())
 		{
@@ -377,16 +366,16 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		catch (FileNotFoundException e) {} 
 		catch (IOException e) 
 		{
-			logger.severe(PREFIX + "can't read configuration file");
+			getLogger().severe(PREFIX + "can't read configuration file");
 			e.printStackTrace();
 		} 
 		catch (InvalidConfigurationException e) 
 		{
-			logger.severe(PREFIX + "invalid configuration format");
+			getLogger().severe(PREFIX + "invalid configuration format");
 			e.printStackTrace();
 		}
         
-		advancedlogging = config.getBoolean("AdvancedLogging", false);
+		setAdvancedLogging(config.getBoolean("AdvancedLogging", false));
 
 		ConfigurationSection worlds;
 		
@@ -449,7 +438,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 			tempPlotInfo.RoadHeight = currworld.getInt("RoadHeight", currworld.getInt("WorldHeight", 64));
 			if(tempPlotInfo.RoadHeight > 250)
 			{
-				logger.severe(PREFIX + "RoadHeight above 250 is unsafe. This is the height at which your road is located. Setting it to 64.");
+				getLogger().severe(PREFIX + "RoadHeight above 250 is unsafe. This is the height at which your road is located. Setting it to 64.");
 				tempPlotInfo.RoadHeight = 64;
 			}
 
@@ -488,12 +477,12 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		} 
 		catch (IOException e) 
 		{
-			logger.severe(PREFIX + "error writting configurations");
+			getLogger().severe(PREFIX + "error writting configurations");
 			e.printStackTrace();
 		}
     }
 	
-	private static short getBlockId(ConfigurationSection cs, String section, String def)
+	private short getBlockId(ConfigurationSection cs, String section, String def)
 	{
 		String idvalue = cs.getString(section, def.toString());
 		if(idvalue.indexOf(":") > 0)
@@ -506,7 +495,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		}
 	}
 	
-	private static byte getBlockValue(ConfigurationSection cs, String section, String def)
+	private byte getBlockValue(ConfigurationSection cs, String section, String def)
 	{
 		String idvalue = cs.getString(section, def.toString());
 		if(idvalue.indexOf(":") > 0)
@@ -519,12 +508,12 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		}
 	}
 	
-	private static String getBlockValueId(Short id, Byte value)
+	private String getBlockValueId(Short id, Byte value)
 	{
 		return (value == 0) ? id.toString() : id.toString() + ":" + value.toString();
 	}
 	
-	public static short getBlockId(String block)
+	public short getBlockId(String block)
 	{
 		if(block.indexOf(":") > 0)
 		{
@@ -536,7 +525,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		}
 	}
 	
-	public static byte getBlockValue(String block)
+	public byte getBlockValue(String block)
 	{
 		if(block.indexOf(":") > 0)
 		{
@@ -548,7 +537,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		}
 	}
 	
-	public static String caption(String s)
+	public String caption(String s)
 	{
 		if(captions.containsKey(s))
 		{
@@ -556,13 +545,29 @@ public class PlotMe_DefaultGenerator extends JavaPlugin
 		}
 		else
 		{
-			logger.warning("[" + NAME + "] Missing caption: " + s);
+			getLogger().warning("[" + getName() + "] Missing caption: " + s);
 			return "ERROR:Missing caption '" + s + "'";
 		}
 	}
 	
-	public static String addColor(String string) 
+	public String addColor(String string) 
 	{
 		return ChatColor.translateAlternateColorCodes('&', string);
     }
+
+	public String getConfigPath() {
+		return configpath;
+	}
+
+	private void setConfigPath(String configpath) {
+		this.configpath = configpath;
+	}
+
+	public Boolean getAdvancedLogging() {
+		return advancedlogging;
+	}
+
+	private void setAdvancedLogging(Boolean advancedlogging) {
+		this.advancedlogging = advancedlogging;
+	}
 }

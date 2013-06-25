@@ -39,6 +39,8 @@ import com.worldcretornica.plotme_core.api.v0_14b.IPlotMe_GeneratorManager;
 
 public class GenPlotManager implements IPlotMe_GeneratorManager
 {
+	private PlotMe_DefaultGenerator plugin = null;
+	
 	private static final Set<Integer> blockPlacedLast = new HashSet<Integer>();
     static {
     	blockPlacedLast.add(Material.SAPLING.getId());
@@ -91,13 +93,14 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
         blockPlacedLast.add(Material.ACTIVATOR_RAIL.getId());
     }
 	
-			
+		
 	
 	
 	public Map<String, GenMapInfo> genplotmaps;
-	
-	public GenPlotManager()
+		
+	public GenPlotManager(PlotMe_DefaultGenerator instance)
 	{
+		plugin = instance;
 		genplotmaps = new HashMap<String, GenMapInfo>();
 	}
 	
@@ -1243,7 +1246,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 	public boolean createConfig(String worldname, Map<String, String> args, CommandSender cs) 
 	{
 		FileConfiguration config = new YamlConfiguration();
-		File configfile = new File(PlotMe_DefaultGenerator.configpath, "config.yml");
+		File configfile = new File(plugin.getConfigPath(), "config.yml");
 		try 
 		{
 			config.load(configfile);
@@ -1251,12 +1254,12 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 		catch (FileNotFoundException e) {} 
 		catch (IOException e) 
 		{
-			PlotMe_DefaultGenerator.logger.severe(PlotMe_DefaultGenerator.PREFIX + "can't read configuration file");
+			plugin.getLogger().severe(plugin.PREFIX + "can't read configuration file");
 			e.printStackTrace();
 		} 
 		catch (InvalidConfigurationException e) 
 		{
-			PlotMe_DefaultGenerator.logger.severe(PlotMe_DefaultGenerator.PREFIX + "invalid configuration format");
+			plugin.getLogger().severe(plugin.PREFIX + "invalid configuration format");
 			e.printStackTrace();
 		}
 		
@@ -1286,18 +1289,18 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 		tempPlotInfo.XTranslation = Integer.parseInt(args.get("XTranslation"));
 		tempPlotInfo.ZTranslation = Integer.parseInt(args.get("ZTranslation"));
 		
-		tempPlotInfo.BottomBlockId = PlotMe_DefaultGenerator.getBlockId(args.get("BottomBlockId"));
-		tempPlotInfo.BottomBlockValue = PlotMe_DefaultGenerator.getBlockValue(args.get("BottomBlockId"));
-		tempPlotInfo.WallBlockId = PlotMe_DefaultGenerator.getBlockId(args.get("WallBlockId"));
-		tempPlotInfo.WallBlockValue = PlotMe_DefaultGenerator.getBlockValue(args.get("WallBlockId"));
-		tempPlotInfo.PlotFloorBlockId = PlotMe_DefaultGenerator.getBlockId(args.get("PlotFloorBlockId"));
-		tempPlotInfo.PlotFloorBlockValue = PlotMe_DefaultGenerator.getBlockValue(args.get("PlotFloorBlockId"));
-		tempPlotInfo.PlotFillingBlockId = PlotMe_DefaultGenerator.getBlockId(args.get("PlotFillingBlockId"));
-		tempPlotInfo.PlotFillingBlockValue = PlotMe_DefaultGenerator.getBlockValue(args.get("PlotFillingBlockId"));
-		tempPlotInfo.RoadMainBlockId = PlotMe_DefaultGenerator.getBlockId(args.get("RoadMainBlockId"));
-		tempPlotInfo.RoadMainBlockValue = PlotMe_DefaultGenerator.getBlockValue(args.get("RoadMainBlockId"));
-		tempPlotInfo.RoadStripeBlockId = PlotMe_DefaultGenerator.getBlockId(args.get("RoadStripeBlockId"));
-		tempPlotInfo.RoadStripeBlockValue = PlotMe_DefaultGenerator.getBlockValue(args.get("RoadStripeBlockId"));
+		tempPlotInfo.BottomBlockId = plugin.getBlockId(args.get("BottomBlockId"));
+		tempPlotInfo.BottomBlockValue = plugin.getBlockValue(args.get("BottomBlockId"));
+		tempPlotInfo.WallBlockId = plugin.getBlockId(args.get("WallBlockId"));
+		tempPlotInfo.WallBlockValue = plugin.getBlockValue(args.get("WallBlockId"));
+		tempPlotInfo.PlotFloorBlockId = plugin.getBlockId(args.get("PlotFloorBlockId"));
+		tempPlotInfo.PlotFloorBlockValue = plugin.getBlockValue(args.get("PlotFloorBlockId"));
+		tempPlotInfo.PlotFillingBlockId = plugin.getBlockId(args.get("PlotFillingBlockId"));
+		tempPlotInfo.PlotFillingBlockValue = plugin.getBlockValue(args.get("PlotFillingBlockId"));
+		tempPlotInfo.RoadMainBlockId = plugin.getBlockId(args.get("RoadMainBlockId"));
+		tempPlotInfo.RoadMainBlockValue = plugin.getBlockValue(args.get("RoadMainBlockId"));
+		tempPlotInfo.RoadStripeBlockId = plugin.getBlockId(args.get("RoadStripeBlockId"));
+		tempPlotInfo.RoadStripeBlockValue = plugin.getBlockValue(args.get("RoadStripeBlockId"));
 		
 		tempPlotInfo.RoadHeight = Integer.parseInt(args.get("RoadHeight"));
 
@@ -1335,7 +1338,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 		} 
 		catch (IOException e) 
 		{
-			PlotMe_DefaultGenerator.logger.severe(PlotMe_DefaultGenerator.PREFIX + "error writting configurations");
+			plugin.getLogger().severe(plugin.PREFIX + "error writting configurations");
 			e.printStackTrace();
 		}
 		
