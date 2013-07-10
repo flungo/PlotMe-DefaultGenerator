@@ -93,8 +93,6 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
         blockPlacedLast.add(Material.ACTIVATOR_RAIL.getId());
     }
 	
-		
-	
 	
 	public Map<String, GenMapInfo> genplotmaps;
 		
@@ -102,6 +100,11 @@ public class GenPlotManager implements IPlotMe_GeneratorManager
 	{
 		plugin = instance;
 		genplotmaps = new HashMap<String, GenMapInfo>();
+	}
+	
+	public int getRoadHeight(String worldname)
+	{
+		return getMap(worldname).RoadHeight;
 	}
 	
 	public String getPlotId(Location loc)

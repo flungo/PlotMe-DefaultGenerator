@@ -78,4 +78,6 @@ public interface IPlotMe_GeneratorManager
 	public Map<String, String> getDefaultGenerationConfig();
 	
 	public int getPlotSize(String worldname);
+	
+	public int getRoadHeight(String worldname);
 }
