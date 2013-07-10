@@ -16,15 +16,6 @@
   </dependencies>
   <build>
     <sourceDirectory>src</sourceDirectory>
-    <resources>
-		<resource>
-			<directory>${project.basedir}</directory>
-			<filtering>true</filtering>
-			<includes>
-				<include>plugin.yml</include>
-			</includes>
-		</resource>
-	</resources>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
