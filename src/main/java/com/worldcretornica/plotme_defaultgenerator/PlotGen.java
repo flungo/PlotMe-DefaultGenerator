@@ -12,16 +12,16 @@ import org.bukkit.generator.ChunkGenerator;
 
 public class PlotGen extends ChunkGenerator implements IPlotMe_ChunkGenerator {
 
-    private double plotsize;
-    private double pathsize;
-    private short bottom;
-    private short wall;
-    private short plotfloor;
-    private short filling;
-    private short floor1;
-    private short floor2;
-    private int roadheight;
-    private GenMapInfo temppmi;
+    private final double plotsize;
+    private final double pathsize;
+    private final short bottom;
+    private final short wall;
+    private final short plotfloor;
+    private final short filling;
+    private final short floor1;
+    private final short floor2;
+    private final int roadheight;
+    private final GenMapInfo temppmi;
     private PlotMe_DefaultGenerator plugin = null;
 
     public PlotGen(PlotMe_DefaultGenerator instance) {

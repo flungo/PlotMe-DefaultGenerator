@@ -8,15 +8,15 @@ import org.bukkit.generator.BlockPopulator;
 
 public class PlotPopulator extends BlockPopulator {
 
-    private double plotsize;
-    private double pathsize;
-    private byte bottom;
-    private byte wall;
-    private byte plotfloor;
-    private byte filling;
-    private byte floor1;
-    private byte floor2;
-    private int roadheight;
+    private final double plotsize;
+    private final double pathsize;
+    private final byte bottom;
+    private final byte wall;
+    private final byte plotfloor;
+    private final byte filling;
+    private final byte floor1;
+    private final byte floor2;
+    private final int roadheight;
 
     public PlotPopulator() {
         plotsize = 32;
@@ -42,6 +42,7 @@ public class PlotPopulator extends BlockPopulator {
         roadheight = pmi.RoadHeight;
     }
 
+    @Override
     public void populate(World w, Random rand, Chunk chunk) {
         int cx = chunk.getX();
         int cz = chunk.getZ();

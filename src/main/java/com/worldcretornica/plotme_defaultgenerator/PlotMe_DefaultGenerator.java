@@ -38,6 +38,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin {
 
     private GenPlotManager genPlotManager;
 
+    @Override
     public void onDisable() {
         captions = null;
         genPlotManager = null;
@@ -48,6 +49,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin {
         VERSION = null;
     }
 
+    @Override
     public void onEnable() {
         initialize();
 
@@ -74,7 +76,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin {
         //properties.put("WordWorld", "World");
         properties.put("WordArguments", "arguments");
 
-		//properties.put("InfoId", "ID");
+        //properties.put("InfoId", "ID");
         //properties.put("CommandBuy", "buy");
         //properties.put("ErrCannotBuild","You cannot build here.");
         CreateConfig(filelang, properties, "PlotMe Caption configuration αω");
@@ -194,6 +196,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin {
         return genPlotManager;
     }
 
+    @Override
     public ChunkGenerator getDefaultWorldGenerator(String worldname, String id) {
         String map = worldname.toLowerCase();
         if (genPlotManager.genplotmaps.containsKey(map)) {

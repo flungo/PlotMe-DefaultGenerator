@@ -99,10 +99,12 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         genplotmaps = new HashMap<String, GenMapInfo>();
     }
 
+    @Override
     public int getRoadHeight(String worldname) {
         return getMap(worldname).RoadHeight;
     }
 
+    @Override
     public String getPlotId(Location loc) {
         GenMapInfo pmi = getMap(loc);
 
@@ -184,10 +186,12 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         }
     }
 
+    @Override
     public String getPlotId(Player player) {
         return getPlotId(player.getLocation());
     }
 
+    @Override
     public List<Player> getPlayersInPlot(World w, String id) {
         List<Player> playersInPlot = new ArrayList<Player>();
 
@@ -199,6 +203,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         return playersInPlot;
     }
 
+    @Override
     public void fillroad(String id1, String id2, World w) {
         Location bottomPlot1 = getPlotBottomLoc(w, id1);
         Location topPlot1 = getPlotTopLoc(w, id1);
@@ -263,6 +268,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         }
     }
 
+    @Override
     public void fillmiddleroad(String id1, String id2, World w) {
         Location bottomPlot1 = getPlotBottomLoc(w, id1);
         Location topPlot1 = getPlotTopLoc(w, id1);
@@ -297,6 +303,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         }
     }
 
+    @Override
     public void setOwnerDisplay(World world, String id, String line1, String line2, String line3, String line4) {
         Location pillar = new Location(world, bottomX(id, world) - 1, getMap(world).RoadHeight + 1, bottomZ(id, world) - 1);
 
@@ -314,6 +321,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         sign.update(true);
     }
 
+    @Override
     public void setSellerDisplay(World world, String id, String line1, String line2, String line3, String line4) {
         removeSellerDisplay(world, id);
 
@@ -333,6 +341,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         sign.update(true);
     }
 
+    @Override
     public void setAuctionDisplay(World world, String id, String line1, String line2, String line3, String line4) {
         removeSellerDisplay(world, id);
 
@@ -352,6 +361,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         sign.update(true);
     }
 
+    @Override
     public void removeOwnerDisplay(World world, String id) {
         Location bottom = getPlotBottomLoc(world, id);
 
@@ -361,6 +371,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         bsign.setType(Material.AIR);
     }
 
+    @Override
     public void removeSellerDisplay(World world, String id) {
         Location bottom = getPlotBottomLoc(world, id);
 
@@ -373,6 +384,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         //bsign.setType(Material.AIR);
     }
 
+    @Override
     public void removeAuctionDisplay(World world, String id) {
         Location bottom = getPlotBottomLoc(world, id);
 
@@ -384,14 +396,17 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         bsign.setType(Material.AIR);
     }
 
+    @Override
     public int getIdX(String id) {
         return Integer.parseInt(id.substring(0, id.indexOf(";")));
     }
 
+    @Override
     public int getIdZ(String id) {
         return Integer.parseInt(id.substring(id.indexOf(";") + 1));
     }
 
+    @Override
     public Location getPlotBottomLoc(World world, String id) {
         int px = getIdX(id);
         int pz = getIdZ(id);
@@ -404,6 +419,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         return new Location(world, x, 1, z);
     }
 
+    @Override
     public Location getPlotTopLoc(World world, String id) {
         int px = getIdX(id);
         int pz = getIdZ(id);
@@ -416,6 +432,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         return new Location(world, x, 255, z);
     }
 
+    @Override
     public void setBiome(World w, String id, Biome b) {
         int bottomX = bottomX(id, w) - 1;
         int topX = topX(id, w) + 1;
@@ -431,6 +448,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         refreshPlotChunks(w, id);
     }
 
+    @Override
     public void refreshPlotChunks(World w, String id) {
         int bottomX = bottomX(id, w);
         int topX = topX(id, w);
@@ -449,24 +467,29 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         }
     }
 
+    @Override
     public Location getTop(World w, String id) {
         //return new Location(w, topX(id, w), w.getMaxHeight(), topZ(id, w));
         return getPlotTopLoc(w, id);
     }
 
+    @Override
     public Location getBottom(World w, String id) {
         //return new Location(w, bottomX(id, w), 0, bottomZ(id, w));
         return getPlotBottomLoc(w, id);
     }
 
+    @Override
     public void clear(World w, String id) {
         clear(getBottom(w, id), getTop(w, id));
     }
 
+    @Override
     public Long[] clear(World w, String id, long maxBlocks, boolean clearEntities, Long[] start) {
         return clear(getBottom(w, id), getTop(w, id), maxBlocks, clearEntities, start);
     }
 
+    @Override
     public void clear(Location bottom, Location top) {
         GenMapInfo gmi = getMap(bottom);
 
@@ -561,6 +584,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         }
     }
 
+    @Override
     public Long[] clear(Location bottom, Location top, long maxBlocks, boolean clearEntities, Long[] start) {
         if (clearEntities) {
             clearEntities(bottom, top);
@@ -652,6 +676,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         return null;
     }
 
+    @Override
     public void adjustPlotFor(World w, String id, boolean Claimed, boolean Protected, boolean Auctionned, boolean ForSale) {
         //Plot plot = getPlotById(l);
         //World w = l.getWorld();
@@ -672,7 +697,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
             wallids.add(forsalewallid);
         }
 
-        if (wallids.size() == 0) {
+        if (wallids.isEmpty()) {
             wallids.add("" + pmi.WallBlockId + ":" + pmi.WallBlockValue);
         }
 
@@ -745,6 +770,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         block.setTypeIdAndData(blockId, blockData, true);
     }
 
+    @Override
     public boolean isBlockInPlot(String id, Location blocklocation) {
         World w = blocklocation.getWorld();
         int lowestX = Math.min(bottomX(id, w), topX(id, w));
@@ -756,6 +782,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
                 && blocklocation.getBlockZ() >= lowestZ && blocklocation.getBlockZ() <= highestZ;
     }
 
+    @Override
     public boolean movePlot(World wFrom, World wTo, String idFrom, String idTo) {
         Location plot1Bottom = getPlotBottomLoc(wFrom, idFrom);
         Location plot2Bottom = getPlotBottomLoc(wTo, idTo);
@@ -921,22 +948,27 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         return true;
     }
 
+    @Override
     public int bottomX(String id, World w) {
         return getPlotBottomLoc(w, id).getBlockX();
     }
 
+    @Override
     public int bottomZ(String id, World w) {
         return getPlotBottomLoc(w, id).getBlockZ();
     }
 
+    @Override
     public int topX(String id, World w) {
         return getPlotTopLoc(w, id).getBlockX();
     }
 
+    @Override
     public int topZ(String id, World w) {
         return getPlotTopLoc(w, id).getBlockZ();
     }
 
+    @Override
     public boolean isValidId(String id) {
         String[] coords = id.split(";");
 
@@ -947,12 +979,13 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
                 Integer.parseInt(coords[0]);
                 Integer.parseInt(coords[1]);
                 return true;
-            } catch (Exception e) {
+            } catch (NumberFormatException e) {
                 return false;
             }
         }
     }
 
+    @Override
     public void regen(World w, String id, CommandSender sender) {
         int bottomX = bottomX(id, w);
         int topX = topX(id, w);
@@ -1033,6 +1066,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         }
     }
 
+    @Override
     public Location getPlotHome(World w, String id) {
         GenMapInfo pmi = getMap(w);
 
@@ -1059,10 +1093,12 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         return genplotmaps.get(worldname.toLowerCase());
     }
 
+    @Override
     public int getPlotSize(String worldname) {
         return getMap(worldname).PlotSize;
     }
 
+    @Override
     public boolean createConfig(String worldname, Map<String, String> args, CommandSender cs) {
         FileConfiguration config = new YamlConfiguration();
         File configfile = new File(plugin.getConfigPath(), "config.yml");
@@ -1151,6 +1187,7 @@ public class GenPlotManager implements IPlotMe_GeneratorManager {
         return true;
     }
 
+    @Override
     public Map<String, String> getDefaultGenerationConfig() {
         Map<String, String> parameters = new HashMap<String, String>();
 
