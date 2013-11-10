@@ -4,6 +4,6 @@ version: '0.14.3'
 author: ZachBora
 load: startup
 website: http://dev.bukkit.org/server-mods/plotme/
-loadbefore: [Multiverse-Core, MultiWorld]
+loadbefore: [Multiverse-Core, MultiWorld, PlotMe-Core]
 description: >
              Handles plot creation
