@@ -35,6 +35,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                             <shadedGroupFilter>com.worldcretornica</shadedGroupFilter>
                             <minimizeJar>true</minimizeJar>
                             <filters>
