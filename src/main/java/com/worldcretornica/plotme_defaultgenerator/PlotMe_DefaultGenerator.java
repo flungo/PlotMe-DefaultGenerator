@@ -1,5 +1,6 @@
 package com.worldcretornica.plotme_defaultgenerator;
 
+import com.worldcretornica.plotme_core.api.v0_14b.IPlotMe_GeneratorManager;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import me.flungo.bukkit.plotme.abstractgenerator.AbstractGenerator;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -19,10 +21,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.yaml.snakeyaml.Yaml;
 
-public class PlotMe_DefaultGenerator extends JavaPlugin {
+public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
     public String PREFIX;
     public String VERSION;
@@ -32,17 +33,14 @@ public class PlotMe_DefaultGenerator extends JavaPlugin {
     private String configpath;
     private Boolean advancedlogging;
 
-    public Boolean usinglwc = false;
-
     private HashMap<String, String> captions;
 
     private GenPlotManager genPlotManager;
 
     @Override
-    public void onDisable() {
+    public void takedown() {
         captions = null;
         genPlotManager = null;
-        usinglwc = null;
         setAdvancedLogging(null);
         setConfigPath(null);
         PREFIX = null;
@@ -50,8 +48,8 @@ public class PlotMe_DefaultGenerator extends JavaPlugin {
     }
 
     @Override
-    public void onEnable() {
-        initialize();
+    public void initialize() {
+        initialise();
 
         loadCaptions();
     }
@@ -298,7 +296,7 @@ public class PlotMe_DefaultGenerator extends JavaPlugin {
         }
     }
 
-    public void initialize() {
+    public void initialise() {
         PluginDescriptionFile pdfFile = this.getDescription();
         PREFIX = ChatColor.BLUE + "[" + getName() + "] " + ChatColor.RESET;
         VERSION = pdfFile.getVersion();
@@ -495,5 +493,10 @@ public class PlotMe_DefaultGenerator extends JavaPlugin {
 
     private void setAdvancedLogging(Boolean advancedlogging) {
         this.advancedlogging = advancedlogging;
+    }
+
+    @Override
+    public IPlotMe_GeneratorManager getGeneratorManager() {
+        return genPlotManager;
     }
 }
