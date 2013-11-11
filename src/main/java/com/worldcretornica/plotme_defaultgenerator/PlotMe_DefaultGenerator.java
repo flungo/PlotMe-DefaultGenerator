@@ -1,18 +1,10 @@
 package com.worldcretornica.plotme_defaultgenerator;
 
 import com.worldcretornica.plotme_core.api.v0_14b.IPlotMe_GeneratorManager;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 import me.flungo.bukkit.plotme.abstractgenerator.AbstractGenerator;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -21,7 +13,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.yaml.snakeyaml.Yaml;
 
 public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
@@ -45,149 +36,6 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
         setConfigPath(null);
         PREFIX = null;
         VERSION = null;
-    }
-
-    @Override
-    public void initialize() {
-        initialise();
-
-        loadCaptions();
-    }
-
-    private void loadCaptions() {
-        File filelang = new File(getConfigPath(), "caption-english.yml");
-        TreeMap<String, String> properties = new TreeMap<String, String>();
-
-		//properties.put("MsgStartDeleteSession","Starting delete session");
-        //properties.put("ConsoleHelpMain", " ---==PlotMe Console Help Page==---");
-        //properties.put("ConsoleHelpReload", " - Reloads the plugin and its configuration files");
-        //properties.put("HelpTitle", "PlotMe Help Page");
-		/*properties.put("HelpPath", " width of the path");
-         properties.put("HelpPlot", " size of the plots");
-         properties.put("HelpHeight", " height of the road");
-         properties.put("HelpBottom", " block id at the bottom");
-         properties.put("HelpWall", " id of the plot border");
-         properties.put("HelpPlotFloor", " id of the plot surface");
-         properties.put("HelpFilling", " id of the blocks below surface");
-         properties.put("HelpRoadFloor1", " id of the road middle");
-         properties.put("HelpRoadFloor2", " id of the road border");*/
-        //properties.put("WordWorld", "World");
-        properties.put("WordArguments", "arguments");
-
-        //properties.put("InfoId", "ID");
-        //properties.put("CommandBuy", "buy");
-        //properties.put("ErrCannotBuild","You cannot build here.");
-        CreateConfig(filelang, properties, "PlotMe Caption configuration αω");
-
-        if (language != null && !language.equals("english")) {
-            filelang = new File(getConfigPath(), "caption-" + language + ".yml");
-            CreateConfig(filelang, properties, "PlotMe DefaultGenerator Caption configuration");
-        }
-
-        InputStream input = null;
-
-        try {
-            input = new FileInputStream(filelang);
-            Yaml yaml = new Yaml();
-            Object obj = yaml.load(input);
-
-            if (obj instanceof LinkedHashMap<?, ?>) {
-                @SuppressWarnings("unchecked")
-                LinkedHashMap<String, String> data = (LinkedHashMap<String, String>) obj;
-
-                captions = new HashMap<String, String>();
-                for (String key : data.keySet()) {
-                    captions.put(key, data.get(key));
-                }
-            }
-        } catch (FileNotFoundException e) {
-            getLogger().severe("[" + getName() + "] File not found: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
-            getLogger().severe("[" + getName() + "] Error with configuration: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-    }
-
-    private void CreateConfig(File file, TreeMap<String, String> properties, String Title) {
-        if (!file.exists()) {
-            BufferedWriter writer = null;
-
-            try {
-                File dir = new File(getConfigPath(), "");
-                dir.mkdirs();
-
-                writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8"));
-                writer.write("# " + Title);
-
-                for (Entry<String, String> e : properties.entrySet()) {
-                    writer.write("\n" + e.getKey() + ": '" + e.getValue().replace("'", "''") + "'");
-                }
-
-                writer.close();
-            } catch (IOException e) {
-                getLogger().severe("[" + getName() + "] Unable to create config file : " + Title + "!");
-                getLogger().severe(e.getMessage());
-            } finally {
-                if (writer != null) {
-                    try {
-                        writer.close();
-                    } catch (IOException e2) {
-                    }
-                }
-            }
-        } else {
-            OutputStreamWriter writer = null;
-            InputStream input = null;
-
-            try {
-                input = new FileInputStream(file);
-                Yaml yaml = new Yaml();
-                Object obj = yaml.load(input);
-
-                if (obj instanceof LinkedHashMap<?, ?>) {
-                    @SuppressWarnings("unchecked")
-                    LinkedHashMap<String, String> data = (LinkedHashMap<String, String>) obj;
-
-                    writer = new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8");
-
-                    for (Entry<String, String> e : properties.entrySet()) {
-                        if (!data.containsKey(e.getKey())) {
-                            writer.write("\n" + e.getKey() + ": '" + e.getValue().replace("'", "''") + "'");
-                        }
-                    }
-
-                    writer.close();
-                    input.close();
-                }
-            } catch (FileNotFoundException e) {
-                getLogger().severe("[" + getName() + "] File not found: " + e.getMessage());
-                e.printStackTrace();
-            } catch (Exception e) {
-                getLogger().severe("[" + getName() + "] Error with configuration: " + e.getMessage());
-                e.printStackTrace();
-            } finally {
-                if (writer != null) {
-                    try {
-                        writer.close();
-                    } catch (IOException e2) {
-                    }
-                }
-                if (input != null) {
-                    try {
-                        input.close();
-                    } catch (IOException e) {
-                    }
-                }
-            }
-        }
     }
 
     public GenPlotManager getGenPlotManager() {
@@ -296,7 +144,8 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
         }
     }
 
-    public void initialise() {
+    @Override
+    public void initialize() {
         PluginDescriptionFile pdfFile = this.getDescription();
         PREFIX = ChatColor.BLUE + "[" + getName() + "] " + ChatColor.RESET;
         VERSION = pdfFile.getVersion();
