@@ -1,23 +1,38 @@
 package com.worldcretornica.plotme_defaultgenerator;
 
 import com.worldcretornica.plotme_core.api.v0_14b.IPlotMe_GeneratorManager;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.AUCTION_WALL_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.BASE_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.FILL_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.FOR_SALE_WALL_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.GROUND_LEVEL;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PATH_WIDTH;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_FLOOR_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_SIZE;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PROTECTED_WALL_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_ALT_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_MAIN_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.WALL_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.X_TRANSLATION;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.Z_TRANSLATION;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import me.flungo.bukkit.plotme.abstractgenerator.AbstractGenerator;
+import me.flungo.bukkit.plotme.abstractgenerator.WorldGenConfig;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.generator.ChunkGenerator;
-import org.bukkit.plugin.PluginDescriptionFile;
 
 public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
+    public static final String DEFAULT_WORLD = "plotsworld";
+
     public String PREFIX;
-    public String VERSION;
 
     public String language;
 
@@ -35,7 +50,6 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
         setAdvancedLogging(null);
         setConfigPath(null);
         PREFIX = null;
-        VERSION = null;
     }
 
     public GenPlotManager getGenPlotManager() {
@@ -146,17 +160,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
     @Override
     public void initialize() {
-        PluginDescriptionFile pdfFile = this.getDescription();
         PREFIX = ChatColor.BLUE + "[" + getName() + "] " + ChatColor.RESET;
-        VERSION = pdfFile.getVersion();
-        setConfigPath(getDataFolder().getParentFile().getAbsolutePath() + File.separator + "PlotMe" + File.separator + getName());
-
-        File configfolder = new File(getConfigPath());
-
-        if (!configfolder.exists()) {
-            configfolder.mkdirs();
-        }
-
         genPlotManager = new GenPlotManager(this);
 
         File configfile = new File(getConfigPath(), "config.yml");
@@ -165,116 +169,64 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
             importOldConfigs(configfile);
         }
 
-        FileConfiguration config = new YamlConfiguration();
-
-        try {
-            config.load(configfile);
-        } catch (FileNotFoundException e) {
-        } catch (IOException e) {
-            getLogger().severe(PREFIX + "can't read configuration file");
-            e.printStackTrace();
-        } catch (InvalidConfigurationException e) {
-            getLogger().severe(PREFIX + "invalid configuration format");
-            e.printStackTrace();
+        // Set defaults for WorldGenConfig
+        for (DefaultWorldConfigPath wcp : DefaultWorldConfigPath.values()) {
+            WorldGenConfig.putDefault(wcp);
         }
 
-        setAdvancedLogging(config.getBoolean("AdvancedLogging", false));
+        // Override defaults from AbstarctWorldConfigPath
+        WorldGenConfig.putDefault(PLOT_SIZE, 32);
 
-        ConfigurationSection worlds;
-
-        if (!config.contains("worlds")) {
-            worlds = config.createSection("worlds");
-
-            ConfigurationSection plotworld = worlds.createSection("plotworld");
-
-            plotworld.set("PathWidth", 7);
-            plotworld.set("PlotSize", 32);
-
-            plotworld.set("XTranslation", 0);
-            plotworld.set("ZTranslation", 0);
-
-            plotworld.set("BottomBlockId", "7");
-            plotworld.set("WallBlockId", "44");
-            plotworld.set("PlotFloorBlockId", "2");
-            plotworld.set("PlotFillingBlockId", "3");
-            plotworld.set("RoadMainBlockId", "5");
-            plotworld.set("RoadStripeBlockId", "5:2");
-
-            plotworld.set("RoadHeight", 64);
-            plotworld.set("ProtectedWallBlockId", "44:4");
-            plotworld.set("ForSaleWallBlockId", "44:1");
-            plotworld.set("AuctionWallBlockId", "44:1");
-
-            worlds.set("plotworld", plotworld);
-            config.set("worlds", worlds);
-        } else {
-            worlds = config.getConfigurationSection("worlds");
+        // If no world are defined in our config, define a sample world for the user to be able to copy.
+        if (!getConfig().contains(WORLDS_CONFIG_SECTION)) {
+            // Get the config for an imaginary gridplots so that the config is generated.
+            getWorldGenConfig(DEFAULT_WORLD);
+            saveConfig();
         }
+
+        ConfigurationSection worlds = getConfig().getConfigurationSection(WORLDS_CONFIG_SECTION);
 
         for (String worldname : worlds.getKeys(false)) {
-            GenMapInfo tempPlotInfo = new GenMapInfo();
-            ConfigurationSection currworld = worlds.getConfigurationSection(worldname);
+            // Get config for world
+            WorldGenConfig wgc = getWorldGenConfig(worldname);
 
-            tempPlotInfo.PathWidth = currworld.getInt("PathWidth", 7);
-            tempPlotInfo.PlotSize = currworld.getInt("PlotSize", 32);
-
-            tempPlotInfo.XTranslation = currworld.getInt("XTranslation", 0);
-            tempPlotInfo.ZTranslation = currworld.getInt("ZTranslation", 0);
-
-            tempPlotInfo.BottomBlockId = getBlockId(currworld, "BottomBlockId", "7:0");
-            tempPlotInfo.BottomBlockValue = getBlockValue(currworld, "BottomBlockId", "7:0");
-            tempPlotInfo.WallBlockId = getBlockId(currworld, "WallBlockId", "44:0");
-            tempPlotInfo.WallBlockValue = getBlockValue(currworld, "WallBlockId", "44:0");
-            tempPlotInfo.PlotFloorBlockId = getBlockId(currworld, "PlotFloorBlockId", "2:0");
-            tempPlotInfo.PlotFloorBlockValue = getBlockValue(currworld, "PlotFloorBlockId", "2:0");
-            tempPlotInfo.PlotFillingBlockId = getBlockId(currworld, "PlotFillingBlockId", "3:0");
-            tempPlotInfo.PlotFillingBlockValue = getBlockValue(currworld, "PlotFillingBlockId", "3:0");
-            tempPlotInfo.RoadMainBlockId = getBlockId(currworld, "RoadMainBlockId", "5:0");
-            tempPlotInfo.RoadMainBlockValue = getBlockValue(currworld, "RoadMainBlockId", "5:0");
-            tempPlotInfo.RoadStripeBlockId = getBlockId(currworld, "RoadStripeBlockId", "5:2");
-            tempPlotInfo.RoadStripeBlockValue = getBlockValue(currworld, "RoadStripeBlockId", "5:2");
-
-            tempPlotInfo.RoadHeight = currworld.getInt("RoadHeight", currworld.getInt("WorldHeight", 64));
-            if (tempPlotInfo.RoadHeight > 250) {
-                getLogger().severe(PREFIX + "RoadHeight above 250 is unsafe. This is the height at which your road is located. Setting it to 64.");
-                tempPlotInfo.RoadHeight = 64;
+            // Validate config
+            if (wgc.getInt(GROUND_LEVEL) > 250) {
+                getLogger().severe(PREFIX + "RoadHeight above 250 is unsafe. This is the height at which your road is located. Setting it to 250.");
+                wgc.set(GROUND_LEVEL, 250);
             }
 
-            tempPlotInfo.ProtectedWallBlockId = currworld.getString("ProtectedWallBlockId", "44:4");
-            tempPlotInfo.ForSaleWallBlockId = currworld.getString("ForSaleWallBlockId", "44:1");
-            tempPlotInfo.AuctionWallBlockId = currworld.getString("AuctionWallBlockId", "44:1");
+            GenMapInfo tempPlotInfo = new GenMapInfo();
 
-            currworld.set("PathWidth", tempPlotInfo.PathWidth);
-            currworld.set("PlotSize", tempPlotInfo.PlotSize);
+            tempPlotInfo.PathWidth = wgc.getInt(PATH_WIDTH);
+            tempPlotInfo.PlotSize = wgc.getInt(PLOT_SIZE);
 
-            currworld.set("XTranslation", tempPlotInfo.XTranslation);
-            currworld.set("ZTranslation", tempPlotInfo.ZTranslation);
+            tempPlotInfo.XTranslation = wgc.getInt(X_TRANSLATION);
+            tempPlotInfo.ZTranslation = wgc.getInt(Z_TRANSLATION);
 
-            currworld.set("BottomBlockId", getBlockValueId(tempPlotInfo.BottomBlockId, tempPlotInfo.BottomBlockValue));
-            currworld.set("WallBlockId", getBlockValueId(tempPlotInfo.WallBlockId, tempPlotInfo.WallBlockValue));
-            currworld.set("PlotFloorBlockId", getBlockValueId(tempPlotInfo.PlotFloorBlockId, tempPlotInfo.PlotFloorBlockValue));
-            currworld.set("PlotFillingBlockId", getBlockValueId(tempPlotInfo.PlotFillingBlockId, tempPlotInfo.PlotFillingBlockValue));
-            currworld.set("RoadMainBlockId", getBlockValueId(tempPlotInfo.RoadMainBlockId, tempPlotInfo.RoadMainBlockValue));
-            currworld.set("RoadStripeBlockId", getBlockValueId(tempPlotInfo.RoadStripeBlockId, tempPlotInfo.RoadStripeBlockValue));
+            tempPlotInfo.BottomBlockId = wgc.getBlockRepresentation(BASE_BLOCK).getId();
+            tempPlotInfo.BottomBlockValue = wgc.getBlockRepresentation(BASE_BLOCK).getData();
+            tempPlotInfo.WallBlockId = wgc.getBlockRepresentation(WALL_BLOCK).getId();
+            tempPlotInfo.WallBlockValue = wgc.getBlockRepresentation(WALL_BLOCK).getData();
+            tempPlotInfo.PlotFloorBlockId = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getId();
+            tempPlotInfo.PlotFloorBlockValue = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getData();
+            tempPlotInfo.PlotFillingBlockId = wgc.getBlockRepresentation(FILL_BLOCK).getId();
+            tempPlotInfo.PlotFillingBlockValue = wgc.getBlockRepresentation(FILL_BLOCK).getData();
+            tempPlotInfo.RoadMainBlockId = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getId();
+            tempPlotInfo.RoadMainBlockValue = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getData();
+            tempPlotInfo.RoadStripeBlockId = wgc.getBlockRepresentation(ROAD_ALT_BLOCK).getId();
+            tempPlotInfo.RoadStripeBlockValue = wgc.getBlockRepresentation(ROAD_ALT_BLOCK).getData();
 
-            currworld.set("RoadHeight", tempPlotInfo.RoadHeight);
-            currworld.set("WorldHeight", null);
+            tempPlotInfo.RoadHeight = wgc.getInt(GROUND_LEVEL);
 
-            currworld.set("ProtectedWallBlockId", tempPlotInfo.ProtectedWallBlockId);
-            currworld.set("ForSaleWallBlockId", tempPlotInfo.ForSaleWallBlockId);
-            currworld.set("AuctionWallBlockId", tempPlotInfo.AuctionWallBlockId);
-
-            worlds.set(worldname, currworld);
+            tempPlotInfo.ProtectedWallBlockId = wgc.getString(PROTECTED_WALL_BLOCK);
+            tempPlotInfo.ForSaleWallBlockId = wgc.getString(FOR_SALE_WALL_BLOCK);
+            tempPlotInfo.AuctionWallBlockId = wgc.getString(AUCTION_WALL_BLOCK);
 
             genPlotManager.genplotmaps.put(worldname.toLowerCase(), tempPlotInfo);
         }
 
-        try {
-            config.save(configfile);
-        } catch (IOException e) {
-            getLogger().severe(PREFIX + "error writting configurations");
-            e.printStackTrace();
-        }
+        saveConfig();
     }
 
     private short getBlockId(ConfigurationSection cs, String section, String def) {
