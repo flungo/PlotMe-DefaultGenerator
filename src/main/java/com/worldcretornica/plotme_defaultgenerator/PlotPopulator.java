@@ -224,6 +224,7 @@ public class PlotPopulator extends BlockPopulator {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void setBlock(World w, int x, int y, int z, byte val) {
         if (val != 0) {
             w.getBlockAt(x, y, z).setData(val);

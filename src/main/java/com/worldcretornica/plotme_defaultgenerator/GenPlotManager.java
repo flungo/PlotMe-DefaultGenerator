@@ -35,6 +35,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+@SuppressWarnings("deprecation")
 public class GenPlotManager implements IPlotMe_GeneratorManager {
 
     private PlotMe_DefaultGenerator plugin = null;
