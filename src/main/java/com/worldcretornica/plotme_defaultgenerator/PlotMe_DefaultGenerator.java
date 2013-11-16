@@ -187,22 +187,6 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
         saveConfig();
     }
 
-    public short getBlockId(String block) {
-        if (block.indexOf(":") > 0) {
-            return Short.parseShort(block.split(":")[0]);
-        } else {
-            return Short.parseShort(block);
-        }
-    }
-
-    public byte getBlockValue(String block) {
-        if (block.indexOf(":") > 0) {
-            return Byte.parseByte(block.split(":")[1]);
-        } else {
-            return 0;
-        }
-    }
-
     public String caption(String s) {
         if (captions.containsKey(s)) {
             return addColor(captions.get(s));
