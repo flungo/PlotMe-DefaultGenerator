@@ -6,6 +6,7 @@ import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PATH_WIDTH;
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_FLOOR_BLOCK;
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_SIZE;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_ALT_BLOCK;
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_MAIN_BLOCK;
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.WALL_BLOCK;
 import java.util.Random;
@@ -31,12 +32,12 @@ public class PlotGen extends AbstractChunkGenerator {
         final int plotsize = wgc.getInt(PLOT_SIZE);
         final int pathsize = wgc.getInt(PATH_WIDTH);
         final int roadheight = wgc.getInt(GROUND_LEVEL);
-        final byte bottom = wgc.getBlockRepresentation(BASE_BLOCK).getData();
-        final byte wall = wgc.getBlockRepresentation(WALL_BLOCK).getData();
-        final byte floor1 = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getData();
-        final byte floor2 = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getData();
-        final byte plotfloor = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getData();
-        final byte filling = wgc.getBlockRepresentation(FILL_BLOCK).getData();
+        final short bottom = wgc.getBlockRepresentation(BASE_BLOCK).getId();
+        final short wall = wgc.getBlockRepresentation(WALL_BLOCK).getId();
+        final short floor1 = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getId();
+        final short floor2 = wgc.getBlockRepresentation(ROAD_ALT_BLOCK).getId();
+        final short plotfloor = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getId();
+        final short filling = wgc.getBlockRepresentation(FILL_BLOCK).getId();
 
         short[][] result = new short[maxY / 16][];
 
