@@ -46,6 +46,7 @@
                                 <includes>
                                     <include>com.worldcretornica:PlotMe-Core</include>
                                     <include>me.flungo.bukkit:PlotMe-AbstractGenerator</include>
+                                    <include>org.mcstats.bukkit:metrics</include>
                                 </includes>
                             </artifactSet>
                             <filters>
@@ -60,6 +61,10 @@
                                 <relocation>
                                     <pattern>me.flungo.bukkit.plotme.abstractgenerator</pattern>
                                     <shadedPattern>com.worldcretornica.plotme_defaultgenerator</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.mcstats</pattern>
+                                    <shadedPattern>com.worldcretornica.plotme_core</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
