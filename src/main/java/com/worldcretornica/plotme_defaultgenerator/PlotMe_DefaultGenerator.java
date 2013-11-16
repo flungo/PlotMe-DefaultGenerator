@@ -27,6 +27,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.plugin.PluginManager;
 
 public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
@@ -148,6 +149,10 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
     public void initialize() {
         PREFIX = ChatColor.BLUE + "[" + getName() + "] " + ChatColor.RESET;
         genPlotManager = new GenPlotManager(this);
+
+        // Setup PluginListener
+        PluginManager pm = getServer().getPluginManager();
+        pm.registerEvents(new PluginListener(this), this);
 
         // Set defaults for WorldGenConfig
         for (DefaultWorldConfigPath wcp : DefaultWorldConfigPath.values()) {
