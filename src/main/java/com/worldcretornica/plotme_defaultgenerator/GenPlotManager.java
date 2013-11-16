@@ -29,11 +29,8 @@ import org.bukkit.inventory.InventoryHolder;
 
 public class GenPlotManager extends AbstractGenManager {
 
-    private PlotMe_DefaultGenerator plugin = null;
-
     public GenPlotManager(PlotMe_DefaultGenerator instance) {
         super(instance);
-        plugin = instance;
     }
 
     @Override
@@ -428,7 +425,7 @@ public class GenPlotManager extends AbstractGenManager {
         int topX = top.getBlockX();
         int bottomZ = 0;
         int topZ = top.getBlockZ();
-        int maxY = 0;
+        int maxY;
 
         long nbBlockCleared = 0;
         long nbBlockClearedBefore = 0;
