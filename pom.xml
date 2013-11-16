@@ -59,7 +59,7 @@
                             <relocations>
                                 <relocation>
                                     <pattern>me.flungo.bukkit.plotme.abstractgenerator</pattern>
-                                    <shadedPattern>me.flungo.bukkit.plotme.gridgenerator</shadedPattern>
+                                    <shadedPattern>com.worldcretornica.plotme_defaultgenerator</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
