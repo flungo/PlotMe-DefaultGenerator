@@ -1,60 +1,42 @@
 package com.worldcretornica.plotme_defaultgenerator;
 
-import com.worldcretornica.plotme_core.api.v0_14b.IPlotMe_ChunkGenerator;
-import com.worldcretornica.plotme_core.api.v0_14b.IPlotMe_GeneratorManager;
-import java.util.Arrays;
-import java.util.List;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.BASE_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.FILL_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.GROUND_LEVEL;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PATH_WIDTH;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_FLOOR_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_SIZE;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_MAIN_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.WALL_BLOCK;
 import java.util.Random;
-import org.bukkit.Location;
+import me.flungo.bukkit.plotme.abstractgenerator.AbstractChunkGenerator;
+import me.flungo.bukkit.plotme.abstractgenerator.WorldGenConfig;
 import org.bukkit.World;
-import org.bukkit.generator.BlockPopulator;
-import org.bukkit.generator.ChunkGenerator;
 
-public class PlotGen extends ChunkGenerator implements IPlotMe_ChunkGenerator {
+public class PlotGen extends AbstractChunkGenerator {
 
-    private final double plotsize;
-    private final double pathsize;
-    private final short bottom;
-    private final short wall;
-    private final short plotfloor;
-    private final short filling;
-    private final short floor1;
-    private final short floor2;
-    private final int roadheight;
-    private final GenMapInfo temppmi;
-    private PlotMe_DefaultGenerator plugin = null;
+    private final WorldGenConfig wgc;
+    private final PlotMe_DefaultGenerator plugin;
 
-    public PlotGen(PlotMe_DefaultGenerator instance) {
-        plugin = instance;
-        plotsize = 32;
-        pathsize = 7;
-        bottom = 7;
-        wall = 44;
-        plotfloor = 2;
-        filling = 3;
-        roadheight = 64;
-        floor1 = 5;
-        floor2 = 5;
-        temppmi = null;
-    }
-
-    public PlotGen(PlotMe_DefaultGenerator instance, GenMapInfo pmi) {
-        plugin = instance;
-        plotsize = pmi.PlotSize;
-        pathsize = pmi.PathWidth;
-        bottom = pmi.BottomBlockId;
-        wall = pmi.WallBlockId;
-        plotfloor = pmi.PlotFloorBlockId;
-        filling = pmi.PlotFillingBlockId;
-        roadheight = pmi.RoadHeight;
-        floor1 = pmi.RoadMainBlockId;
-        floor2 = pmi.RoadStripeBlockId;
-        temppmi = pmi;
+    public PlotGen(PlotMe_DefaultGenerator instance, WorldGenConfig wgc) {
+        super(instance, wgc);
+        this.plugin = instance;
+        this.wgc = wgc;
     }
 
     @Override
     public short[][] generateExtBlockSections(World world, Random random, int cx, int cz, BiomeGrid biomes) {
-        int maxY = world.getMaxHeight();
+        final int maxY = world.getMaxHeight();
+
+        final int plotsize = wgc.getInt(PLOT_SIZE);
+        final int pathsize = wgc.getInt(PATH_WIDTH);
+        final int roadheight = wgc.getInt(GROUND_LEVEL);
+        final byte bottom = wgc.getBlockRepresentation(BASE_BLOCK).getData();
+        final byte wall = wgc.getBlockRepresentation(WALL_BLOCK).getData();
+        final byte floor1 = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getData();
+        final byte floor2 = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getData();
+        final byte plotfloor = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getData();
+        final byte filling = wgc.getBlockRepresentation(FILL_BLOCK).getData();
 
         short[][] result = new short[maxY / 16][];
 
@@ -237,21 +219,5 @@ public class PlotGen extends ChunkGenerator implements IPlotMe_ChunkGenerator {
             result[y >> 4] = new short[4096];
         }
         result[y >> 4][((y & 0xF) << 8) | (z << 4) | x] = blkid;
-    }
-
-    public List<BlockPopulator> getDefaultPopulators(World world) {
-        if (temppmi == null) {
-            return Arrays.asList((BlockPopulator) new PlotPopulator());
-        } else {
-            return Arrays.asList((BlockPopulator) new PlotPopulator(temppmi));
-        }
-    }
-
-    public Location getFixedSpawnLocation(World world, Random random) {
-        return new Location(world, 0, roadheight + 2, 0);
-    }
-
-    public IPlotMe_GeneratorManager getManager() {
-        return plugin.getGenPlotManager();
     }
 }
