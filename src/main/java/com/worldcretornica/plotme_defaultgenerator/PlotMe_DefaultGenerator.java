@@ -16,27 +16,27 @@ import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.X_TRANSLATION;
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.Z_TRANSLATION;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 import me.flungo.bukkit.plotme.abstractgenerator.AbstractGenerator;
 import me.flungo.bukkit.plotme.abstractgenerator.WorldGenConfig;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.generator.ChunkGenerator;
 
 public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
+    public static final String CORE_OLD_CONFIG = "config-old.yml";
     public static final String DEFAULT_WORLD = "plotsworld";
 
     public String PREFIX;
 
     public String language;
 
-    private String configpath;
     private Boolean advancedlogging;
 
     private HashMap<String, String> captions;
@@ -48,7 +48,6 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
         captions = null;
         genPlotManager = null;
         setAdvancedLogging(null);
-        setConfigPath(null);
         PREFIX = null;
     }
 
@@ -66,95 +65,86 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
         }
     }
 
-    private void importOldConfigs(File newfile) {
-        File oldfile;
+    public void importOldConfigs() {
+        // Get the old config file
+        final File oldConfigFile = new File(getCoreFolder(), CORE_OLD_CONFIG);
 
-        oldfile = new File(getDataFolder().getParentFile().getAbsolutePath() + File.separator + "PlotMe" + File.separator + "config.yml");
-
-        if (!oldfile.exists()) {
-            oldfile = new File(getDataFolder().getParentFile().getAbsolutePath() + File.separator + "PlotMe" + File.separator + "config.backup.yml");
+        // If it doesn't exist there is nothing to import
+        if (!oldConfigFile.exists()) {
+            return;
         }
 
-        if (oldfile.exists()) {
-            getLogger().info(PREFIX + "Importing old configurations");
-            FileConfiguration oldconfig = new YamlConfiguration();
-            FileConfiguration newconfig = new YamlConfiguration();
+        // Load the config from the file and get the worlds config section
+        final FileConfiguration oldConfig = YamlConfiguration.loadConfiguration(oldConfigFile);
+        final ConfigurationSection oldWorldsCS = oldConfig.getConfigurationSection(WORLDS_CONFIG_SECTION);
 
-            try {
-                oldconfig.load(oldfile);
-            } catch (FileNotFoundException e) {
-                return;
-            } catch (IOException e) {
-                getLogger().severe(PREFIX + "can't read old configuration file");
-                e.printStackTrace();
-                return;
-            } catch (InvalidConfigurationException e) {
-                getLogger().severe(PREFIX + "invalid old configuration format");
-                e.printStackTrace();
-                return;
+        // If there are no worlds then there is nothing to import
+        if (oldWorldsCS == null || oldWorldsCS.getKeys(false).isEmpty()) {
+            return;
+        }
+
+        // Get the local worlds config section
+        final ConfigurationSection worldsCS = getConfig().getConfigurationSection(WORLDS_CONFIG_SECTION);
+
+        // Create a mapping from oldConfig to config
+        final Map<String, String> mapping = new HashMap<String, String>();
+
+        mapping.put("PlotSize", PLOT_SIZE.path);
+        mapping.put("XTranslation", X_TRANSLATION.path);
+        mapping.put("ZTranslation", Z_TRANSLATION.path);
+        mapping.put("RoadHeight", GROUND_LEVEL.path);
+        mapping.put("BottomBlockId", BASE_BLOCK.path);
+        mapping.put("PlotFillingBlockId", FILL_BLOCK.path);
+        mapping.put("PathWidth", PATH_WIDTH.path);
+        mapping.put("PlotFloorBlockId", PLOT_FLOOR_BLOCK.path);
+        mapping.put("RoadMainBlockId", ROAD_MAIN_BLOCK.path);
+        mapping.put("RoadStripeBlockId", ROAD_ALT_BLOCK.path);
+        mapping.put("WallBlockId", WALL_BLOCK.path);
+        mapping.put("ProtectedWallBlockId", PROTECTED_WALL_BLOCK.path);
+        mapping.put("AuctionWallBlockId", AUCTION_WALL_BLOCK.path);
+        mapping.put("ForSaleWallBlockId", FOR_SALE_WALL_BLOCK.path);
+
+        // Import each world
+        for (String worldname : oldWorldsCS.getKeys(false)) {
+            ConfigurationSection oldWorldCS = oldWorldsCS.getConfigurationSection(worldname);
+
+            // Get the local config world section and create it if it doesn't exist
+            ConfigurationSection worldCS = worldsCS.getConfigurationSection(worldname);
+            if (worldCS == null) {
+                worldCS = worldsCS.createSection(worldname);
             }
 
-            ConfigurationSection oldworlds;
-            ConfigurationSection newworlds;
-
-            if (!oldconfig.contains("worlds")) {
-                return;
-            } else {
-                oldworlds = oldconfig.getConfigurationSection("worlds");
-            }
-
-            if (!newconfig.contains("worlds")) {
-                newworlds = newconfig.createSection("worlds");
-            } else {
-                newworlds = newconfig.getConfigurationSection("worlds");
-            }
-
-            for (String worldname : oldworlds.getKeys(false)) {
-                ConfigurationSection oldcurrworld = oldworlds.getConfigurationSection(worldname);
-                ConfigurationSection newcurrworld;
-
-                if (newworlds.contains("worldname")) {
-                    newcurrworld = newworlds.getConfigurationSection(worldname);
-                } else {
-                    newcurrworld = newworlds.createSection(worldname);
+            // For each path import config and rename where required.
+            for (String path : oldWorldCS.getKeys(true)) {
+                if (mapping.containsKey(path)) {
+                    String newPath = mapping.get(path);
+                    if (worldCS.contains(newPath)) {
+                        if (worldCS.get(newPath).equals(oldWorldCS.get(path))) {
+                            // Great no work to do except deleting from the old config
+                            oldWorldCS.set(path, null);
+                        } else {
+                            // Can't migrate the path
+                            String fullPathBase = oldWorldCS.getCurrentPath();
+                            getLogger().log(Level.WARNING,
+                                    "Could not migrate '{0}.{1}' from {2} to '{0}.{3}' in {4}{5}: Path exists in desitnation. Please merge manually." + DEFAULT_CONFIG_NAME,
+                                    new Object[]{fullPathBase, path, oldConfigFile, newPath, getConfigFolder(), File.separator});
+                        }
+                    } else {
+                        // Migrate!
+                        worldCS.set(path, oldWorldCS.get(path));
+                        oldWorldCS.set(path, null);
+                    }
                 }
-
-                newcurrworld.set("PathWidth", oldcurrworld.getInt("PathWidth", 7));
-                newcurrworld.set("PlotSize", oldcurrworld.getInt("PlotSize", 32));
-
-                newcurrworld.set("XTranslation", oldcurrworld.getInt("XTranslation", 0));
-                newcurrworld.set("ZTranslation", oldcurrworld.getInt("ZTranslation", 0));
-
-                newcurrworld.set("BottomBlockId", oldcurrworld.getString("BottomBlockId", "7:0"));
-                newcurrworld.set("WallBlockId", oldcurrworld.getString("WallBlockId", "44:0"));
-                newcurrworld.set("PlotFloorBlockId", oldcurrworld.getString("PlotFloorBlockId", "2:0"));
-                newcurrworld.set("PlotFillingBlockId", oldcurrworld.getString("PlotFillingBlockId", "3:0"));
-                newcurrworld.set("RoadMainBlockId", oldcurrworld.getString("RoadMainBlockId", "5:0"));
-                newcurrworld.set("RoadStripeBlockId", oldcurrworld.getString("RoadStripeBlockId", "5:2"));
-
-                newcurrworld.set("RoadHeight", oldcurrworld.getInt("RoadHeight", 64));
-
-                newcurrworld.set("ProtectedWallBlockId", oldcurrworld.getString("ProtectedWallBlockId", "44:4"));
-                newcurrworld.set("ForSaleWallBlockId", oldcurrworld.getString("ForSaleWallBlockId", "44:1"));
-                newcurrworld.set("AuctionWallBlockId", oldcurrworld.getString("AuctionWallBlockId", "44:1"));
-
-                newworlds.set(worldname, newcurrworld);
-
             }
+        }
 
-            newconfig.set("worlds", newworlds);
+        // Save the configs
+        saveConfig();
 
-            try {
-                newconfig.save(newfile);
-
-                if (!oldfile.getName().contains("config.backup.yml")) {
-                    oldfile.renameTo(new File(getDataFolder().getParentFile().getAbsolutePath() + File.separator + "PlotMe" + File.separator + "config.backup.yml"));
-                }
-            } catch (IOException e) {
-                getLogger().severe(PREFIX + "error writting configurations");
-                e.printStackTrace();
-                return;
-            }
+        try {
+            oldConfig.save(oldConfigFile);
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, "Could not save config to " + oldConfigFile, ex);
         }
     }
 
@@ -162,12 +152,6 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
     public void initialize() {
         PREFIX = ChatColor.BLUE + "[" + getName() + "] " + ChatColor.RESET;
         genPlotManager = new GenPlotManager(this);
-
-        File configfile = new File(getConfigPath(), "config.yml");
-
-        if (!configfile.exists()) {
-            importOldConfigs(configfile);
-        }
 
         // Set defaults for WorldGenConfig
         for (DefaultWorldConfigPath wcp : DefaultWorldConfigPath.values()) {
@@ -278,14 +262,6 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
     public String addColor(String string) {
         return ChatColor.translateAlternateColorCodes('&', string);
-    }
-
-    public String getConfigPath() {
-        return configpath;
-    }
-
-    private void setConfigPath(String configpath) {
-        this.configpath = configpath;
     }
 
     public Boolean getAdvancedLogging() {
