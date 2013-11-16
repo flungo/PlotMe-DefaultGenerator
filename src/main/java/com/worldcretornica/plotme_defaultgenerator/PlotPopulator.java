@@ -1,6 +1,15 @@
 package com.worldcretornica.plotme_defaultgenerator;
 
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.BASE_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.FILL_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.GROUND_LEVEL;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PATH_WIDTH;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_FLOOR_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_SIZE;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_MAIN_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.WALL_BLOCK;
 import java.util.Random;
+import me.flungo.bukkit.plotme.abstractgenerator.WorldGenConfig;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
@@ -8,42 +17,24 @@ import org.bukkit.generator.BlockPopulator;
 
 public class PlotPopulator extends BlockPopulator {
 
-    private final double plotsize;
-    private final double pathsize;
-    private final byte bottom;
-    private final byte wall;
-    private final byte plotfloor;
-    private final byte filling;
-    private final byte floor1;
-    private final byte floor2;
-    private final int roadheight;
+    private final WorldGenConfig wgc;
 
-    public PlotPopulator() {
-        plotsize = 32;
-        pathsize = 7;
-        bottom = 0;
-        wall = 0;
-        plotfloor = 0;
-        filling = 0;
-        roadheight = 64;
-        floor2 = 0;
-        floor1 = 2;
-    }
-
-    public PlotPopulator(GenMapInfo pmi) {
-        plotsize = pmi.PlotSize;
-        pathsize = pmi.PathWidth;
-        bottom = pmi.BottomBlockValue;
-        wall = pmi.WallBlockValue;
-        plotfloor = pmi.PlotFloorBlockValue;
-        filling = pmi.PlotFillingBlockValue;
-        floor2 = pmi.RoadMainBlockValue;
-        floor1 = pmi.RoadStripeBlockValue;
-        roadheight = pmi.RoadHeight;
+    public PlotPopulator(WorldGenConfig wgc) {
+        this.wgc = wgc;
     }
 
     @Override
     public void populate(World w, Random rand, Chunk chunk) {
+        final int plotsize = wgc.getInt(PLOT_SIZE);
+        final int pathsize = wgc.getInt(PATH_WIDTH);
+        final int roadheight = wgc.getInt(GROUND_LEVEL);
+        final byte bottom = wgc.getBlockRepresentation(BASE_BLOCK).getData();
+        final byte wall = wgc.getBlockRepresentation(WALL_BLOCK).getData();
+        final byte floor1 = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getData();
+        final byte floor2 = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getData();
+        final byte plotfloor = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getData();
+        final byte filling = wgc.getBlockRepresentation(FILL_BLOCK).getData();
+
         int cx = chunk.getX();
         int cz = chunk.getZ();
 

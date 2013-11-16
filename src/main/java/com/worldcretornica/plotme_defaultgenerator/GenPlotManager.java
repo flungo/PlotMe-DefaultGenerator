@@ -1,10 +1,21 @@
 package com.worldcretornica.plotme_defaultgenerator;
 
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.AUCTION_WALL_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.BASE_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.FILL_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.FOR_SALE_WALL_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.GROUND_LEVEL;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PATH_WIDTH;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_FLOOR_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_SIZE;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PROTECTED_WALL_BLOCK;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.WALL_BLOCK;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import me.flungo.bukkit.plotme.abstractgenerator.AbstractGenManager;
+import me.flungo.bukkit.plotme.abstractgenerator.BlockRepresentation;
+import me.flungo.bukkit.plotme.abstractgenerator.WorldGenConfig;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -20,24 +31,21 @@ public class GenPlotManager extends AbstractGenManager {
 
     private PlotMe_DefaultGenerator plugin = null;
 
-    public Map<String, GenMapInfo> genplotmaps;
-
     public GenPlotManager(PlotMe_DefaultGenerator instance) {
         super(instance);
         plugin = instance;
-        genplotmaps = new HashMap<String, GenMapInfo>();
     }
 
     @Override
     public String getPlotId(Location loc) {
-        GenMapInfo pmi = getMap(loc);
+        WorldGenConfig wgc = getWGC(loc.getWorld());
 
-        if (pmi != null) {
+        if (wgc != null) {
             int valx = loc.getBlockX();
             int valz = loc.getBlockZ();
 
-            int size = pmi.PlotSize + pmi.PathWidth;
-            int pathsize = pmi.PathWidth;
+            int pathsize = wgc.getInt(PATH_WIDTH);
+            int size = wgc.getInt(PLOT_SIZE) + pathsize;
             boolean road = false;
 
             double n3;
@@ -123,25 +131,26 @@ public class GenPlotManager extends AbstractGenManager {
         int maxZ;
         boolean isWallX;
 
-        GenMapInfo pmi = getMap(w);
-        int h = pmi.RoadHeight;
-        int wallId = pmi.WallBlockId;
-        byte wallValue = pmi.WallBlockValue;
-        int fillId = pmi.PlotFloorBlockId;
-        byte fillValue = pmi.PlotFloorBlockValue;
+        WorldGenConfig wgc = getWGC(w);
+        int h = wgc.getInt(GROUND_LEVEL);
+        int wallId = wgc.getBlockRepresentation(WALL_BLOCK).getId();
+        byte wallValue = wgc.getBlockRepresentation(WALL_BLOCK).getData();
+        int fillId = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getId();
+        byte fillValue = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getData();
+        int plotSize = wgc.getInt(PLOT_SIZE);
 
         if (bottomPlot1.getBlockX() == bottomPlot2.getBlockX()) {
             minX = bottomPlot1.getBlockX();
             maxX = topPlot1.getBlockX();
 
-            minZ = Math.min(bottomPlot1.getBlockZ(), bottomPlot2.getBlockZ()) + pmi.PlotSize;
-            maxZ = Math.max(topPlot1.getBlockZ(), topPlot2.getBlockZ()) - pmi.PlotSize;
+            minZ = Math.min(bottomPlot1.getBlockZ(), bottomPlot2.getBlockZ()) + plotSize;
+            maxZ = Math.max(topPlot1.getBlockZ(), topPlot2.getBlockZ()) - plotSize;
         } else {
             minZ = bottomPlot1.getBlockZ();
             maxZ = topPlot1.getBlockZ();
 
-            minX = Math.min(bottomPlot1.getBlockX(), bottomPlot2.getBlockX()) + pmi.PlotSize;
-            maxX = Math.max(topPlot1.getBlockX(), topPlot2.getBlockX()) - pmi.PlotSize;
+            minX = Math.min(bottomPlot1.getBlockX(), bottomPlot2.getBlockX()) + plotSize;
+            maxX = Math.max(topPlot1.getBlockX(), topPlot2.getBlockX()) - plotSize;
         }
 
         isWallX = (maxX - minX) > (maxZ - minZ);
@@ -187,9 +196,9 @@ public class GenPlotManager extends AbstractGenManager {
         int minZ;
         int maxZ;
 
-        GenMapInfo pmi = getMap(w);
-        int h = pmi.RoadHeight;
-        int fillId = pmi.PlotFloorBlockId;
+        WorldGenConfig wgc = getWGC(w);
+        int h = wgc.getInt(GROUND_LEVEL);
+        int fillId = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getId();
 
         minX = Math.min(topPlot1.getBlockX(), topPlot2.getBlockX());
         maxX = Math.max(bottomPlot1.getBlockX(), bottomPlot2.getBlockX());
@@ -212,7 +221,7 @@ public class GenPlotManager extends AbstractGenManager {
 
     @Override
     public void setOwnerDisplay(World world, String id, String line1, String line2, String line3, String line4) {
-        Location pillar = new Location(world, bottomX(id, world) - 1, getMap(world).RoadHeight + 1, bottomZ(id, world) - 1);
+        Location pillar = new Location(world, bottomX(id, world) - 1, getWGC(world).getInt(GROUND_LEVEL) + 1, bottomZ(id, world) - 1);
 
         Block bsign = pillar.clone().add(0, 0, -1).getBlock();
         bsign.setType(Material.AIR);
@@ -232,7 +241,7 @@ public class GenPlotManager extends AbstractGenManager {
     public void setSellerDisplay(World world, String id, String line1, String line2, String line3, String line4) {
         removeSellerDisplay(world, id);
 
-        Location pillar = new Location(world, bottomX(id, world) - 1, getMap(world).RoadHeight + 1, bottomZ(id, world) - 1);
+        Location pillar = new Location(world, bottomX(id, world) - 1, getWGC(world).getInt(GROUND_LEVEL) + 1, bottomZ(id, world) - 1);
 
         Block bsign = pillar.clone().add(-1, 0, 0).getBlock();
         bsign.setType(Material.AIR);
@@ -252,7 +261,7 @@ public class GenPlotManager extends AbstractGenManager {
     public void setAuctionDisplay(World world, String id, String line1, String line2, String line3, String line4) {
         removeSellerDisplay(world, id);
 
-        Location pillar = new Location(world, bottomX(id, world) - 1, getMap(world).RoadHeight + 1, bottomZ(id, world) - 1);
+        Location pillar = new Location(world, bottomX(id, world) - 1, getWGC(world).getInt(GROUND_LEVEL) + 1, bottomZ(id, world) - 1);
 
         Block bsign = pillar.clone().add(-1, 0, 1).getBlock();
         bsign.setType(Material.AIR);
@@ -272,7 +281,7 @@ public class GenPlotManager extends AbstractGenManager {
     public void removeOwnerDisplay(World world, String id) {
         Location bottom = getPlotBottomLoc(world, id);
 
-        Location pillar = new Location(world, bottom.getX() - 1, getMap(world).RoadHeight + 1, bottom.getZ() - 1);
+        Location pillar = new Location(world, bottom.getX() - 1, getWGC(world).getInt(GROUND_LEVEL) + 1, bottom.getZ() - 1);
 
         Block bsign = pillar.add(0, 0, -1).getBlock();
         bsign.setType(Material.AIR);
@@ -282,7 +291,7 @@ public class GenPlotManager extends AbstractGenManager {
     public void removeSellerDisplay(World world, String id) {
         Location bottom = getPlotBottomLoc(world, id);
 
-        Location pillar = new Location(world, bottom.getX() - 1, getMap(world).RoadHeight + 1, bottom.getZ() - 1);
+        Location pillar = new Location(world, bottom.getX() - 1, getWGC(world).getInt(GROUND_LEVEL) + 1, bottom.getZ() - 1);
 
         Block bsign = pillar.clone().add(-1, 0, 0).getBlock();
         bsign.setType(Material.AIR);
@@ -295,7 +304,7 @@ public class GenPlotManager extends AbstractGenManager {
     public void removeAuctionDisplay(World world, String id) {
         Location bottom = getPlotBottomLoc(world, id);
 
-        Location pillar = new Location(world, bottom.getX() - 1, getMap(world).RoadHeight + 1, bottom.getZ() - 1);
+        Location pillar = new Location(world, bottom.getX() - 1, getWGC(world).getInt(GROUND_LEVEL) + 1, bottom.getZ() - 1);
 
         //Block bsign = pillar.clone().add(-1, 0, 0).getBlock();
         //bsign.setType(Material.AIR);
@@ -308,10 +317,12 @@ public class GenPlotManager extends AbstractGenManager {
         int px = getIdX(id);
         int pz = getIdZ(id);
 
-        GenMapInfo pmi = getMap(world);
+        WorldGenConfig wgc = getWGC(world);
+        int plotSize = wgc.getInt(PLOT_SIZE);
+        int pathWidth = wgc.getInt(PATH_WIDTH);
 
-        int x = px * (pmi.PlotSize + pmi.PathWidth) - (pmi.PlotSize) - ((int) Math.floor(pmi.PathWidth / 2));
-        int z = pz * (pmi.PlotSize + pmi.PathWidth) - (pmi.PlotSize) - ((int) Math.floor(pmi.PathWidth / 2));
+        int x = px * (plotSize + pathWidth) - (plotSize) - ((int) Math.floor(pathWidth / 2));
+        int z = pz * (plotSize + pathWidth) - (plotSize) - ((int) Math.floor(pathWidth / 2));
 
         return new Location(world, x, 1, z);
     }
@@ -321,17 +332,23 @@ public class GenPlotManager extends AbstractGenManager {
         int px = getIdX(id);
         int pz = getIdZ(id);
 
-        GenMapInfo pmi = getMap(world);
+        WorldGenConfig wgc = getWGC(world);
+        int plotSize = wgc.getInt(PLOT_SIZE);
+        int pathWidth = wgc.getInt(PATH_WIDTH);
 
-        int x = px * (pmi.PlotSize + pmi.PathWidth) - ((int) Math.floor(pmi.PathWidth / 2)) - 1;
-        int z = pz * (pmi.PlotSize + pmi.PathWidth) - ((int) Math.floor(pmi.PathWidth / 2)) - 1;
+        int x = px * (plotSize + pathWidth) - ((int) Math.floor(pathWidth / 2)) - 1;
+        int z = pz * (plotSize + pathWidth) - ((int) Math.floor(pathWidth / 2)) - 1;
 
         return new Location(world, x, 255, z);
     }
 
     @Override
     public void clear(Location bottom, Location top) {
-        GenMapInfo gmi = getMap(bottom);
+        WorldGenConfig wgc = getWGC(bottom.getWorld());
+        int roadHeight = wgc.getInt(GROUND_LEVEL);
+        BlockRepresentation bottomBlock = wgc.getBlockRepresentation(BASE_BLOCK);
+        BlockRepresentation fillBlock = wgc.getBlockRepresentation(FILL_BLOCK);
+        BlockRepresentation floorBlock = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK);
 
         int bottomX = bottom.getBlockX();
         int topX = top.getBlockX();
@@ -374,13 +391,13 @@ public class GenPlotManager extends AbstractGenManager {
                     }
 
                     if (y == 0) {
-                        block.setTypeId(gmi.BottomBlockId);
-                    } else if (y < gmi.RoadHeight) {
-                        block.setTypeId(gmi.PlotFillingBlockId);
-                    } else if (y == gmi.RoadHeight) {
-                        block.setTypeId(gmi.PlotFloorBlockId);
+                        bottomBlock.setBlock(block);
+                    } else if (y < roadHeight) {
+                        fillBlock.setBlock(block);
+                    } else if (y == roadHeight) {
+                        floorBlock.setBlock(block);
                     } else {
-                        if (y == (gmi.RoadHeight + 1)
+                        if (y == (roadHeight + 1)
                                 && (x == bottomX - 1
                                 || x == topX + 1
                                 || z == bottomZ - 1
@@ -401,7 +418,11 @@ public class GenPlotManager extends AbstractGenManager {
             clearEntities(bottom, top);
         }
 
-        GenMapInfo gmi = getMap(bottom);
+        WorldGenConfig wgc = getWGC(bottom.getWorld());
+        int roadHeight = wgc.getInt(GROUND_LEVEL);
+        BlockRepresentation bottomBlock = wgc.getBlockRepresentation(BASE_BLOCK);
+        BlockRepresentation fillBlock = wgc.getBlockRepresentation(FILL_BLOCK);
+        BlockRepresentation floorBlock = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK);
 
         int bottomX = 0;
         int topX = top.getBlockX();
@@ -455,13 +476,13 @@ public class GenPlotManager extends AbstractGenManager {
                     }
 
                     if (y == 0) {
-                        block.setTypeId(gmi.BottomBlockId);
-                    } else if (y < gmi.RoadHeight) {
-                        block.setTypeId(gmi.PlotFillingBlockId);
-                    } else if (y == gmi.RoadHeight) {
-                        block.setTypeId(gmi.PlotFloorBlockId);
+                        bottomBlock.setBlock(block);
+                    } else if (y < roadHeight) {
+                        fillBlock.setBlock(block);
+                    } else if (y == roadHeight) {
+                        floorBlock.setBlock(block);
                     } else {
-                        if (y == (gmi.RoadHeight + 1)
+                        if (y == (roadHeight + 1)
                                 && (x == bottomX - 1
                                 || x == topX + 1
                                 || z == bottomZ - 1
@@ -491,15 +512,19 @@ public class GenPlotManager extends AbstractGenManager {
     public void adjustPlotFor(World w, String id, boolean Claimed, boolean Protected, boolean Auctionned, boolean ForSale) {
         //Plot plot = getPlotById(l);
         //World w = l.getWorld();
-        GenMapInfo pmi = getMap(w);
+        WorldGenConfig wgc = getWGC(w);
 
         List<String> wallids = new ArrayList<String>();
 
-        String auctionwallid = pmi.AuctionWallBlockId;
-        String forsalewallid = pmi.ForSaleWallBlockId;
+        int roadHeight = wgc.getInt(GROUND_LEVEL);
+
+        String wallid = wgc.getString(WALL_BLOCK);
+        String protectedwallid = wgc.getString(PROTECTED_WALL_BLOCK);
+        String auctionwallid = wgc.getString(AUCTION_WALL_BLOCK);
+        String forsalewallid = wgc.getString(FOR_SALE_WALL_BLOCK);
 
         if (Protected) {
-            wallids.add(pmi.ProtectedWallBlockId);
+            wallids.add(protectedwallid);
         }
         if (Auctionned && !wallids.contains(auctionwallid)) {
             wallids.add(auctionwallid);
@@ -509,7 +534,7 @@ public class GenPlotManager extends AbstractGenManager {
         }
 
         if (wallids.isEmpty()) {
-            wallids.add("" + pmi.WallBlockId + ":" + pmi.WallBlockValue);
+            wallids.add(wallid);
         }
 
         int ctr = 0;
@@ -527,7 +552,7 @@ public class GenPlotManager extends AbstractGenManager {
             z = bottom.getBlockZ() - 1;
             currentblockid = wallids.get(ctr);
             ctr = (ctr == wallids.size() - 1) ? 0 : ctr + 1;
-            block = w.getBlockAt(x, pmi.RoadHeight + 1, z);
+            block = w.getBlockAt(x, roadHeight + 1, z);
             setWall(block, currentblockid);
         }
 
@@ -535,7 +560,7 @@ public class GenPlotManager extends AbstractGenManager {
             x = top.getBlockX() + 1;
             currentblockid = wallids.get(ctr);
             ctr = (ctr == wallids.size() - 1) ? 0 : ctr + 1;
-            block = w.getBlockAt(x, pmi.RoadHeight + 1, z);
+            block = w.getBlockAt(x, roadHeight + 1, z);
             setWall(block, currentblockid);
         }
 
@@ -543,7 +568,7 @@ public class GenPlotManager extends AbstractGenManager {
             z = top.getBlockZ() + 1;
             currentblockid = wallids.get(ctr);
             ctr = (ctr == wallids.size() - 1) ? 0 : ctr + 1;
-            block = w.getBlockAt(x, pmi.RoadHeight + 1, z);
+            block = w.getBlockAt(x, roadHeight + 1, z);
             setWall(block, currentblockid);
         }
 
@@ -551,7 +576,7 @@ public class GenPlotManager extends AbstractGenManager {
             x = bottom.getBlockX() - 1;
             currentblockid = wallids.get(ctr);
             ctr = (ctr == wallids.size() - 1) ? 0 : ctr + 1;
-            block = w.getBlockAt(x, pmi.RoadHeight + 1, z);
+            block = w.getBlockAt(x, roadHeight + 1, z);
             setWall(block, currentblockid);
         }
     }
@@ -560,42 +585,25 @@ public class GenPlotManager extends AbstractGenManager {
 
         int blockId;
         byte blockData = 0;
-        GenMapInfo pmi = getMap(block);
+        WorldGenConfig wgc = getWGC(block.getWorld());
 
         if (currentblockid.contains(":")) {
             try {
                 blockId = Integer.parseInt(currentblockid.substring(0, currentblockid.indexOf(":")));
                 blockData = Byte.parseByte(currentblockid.substring(currentblockid.indexOf(":") + 1));
             } catch (NumberFormatException e) {
-                blockId = pmi.WallBlockId;
-                blockData = pmi.WallBlockValue;
+                blockId = wgc.getBlockRepresentation(WALL_BLOCK).getId();
+                blockData = wgc.getBlockRepresentation(WALL_BLOCK).getData();
             }
         } else {
             try {
                 blockId = Integer.parseInt(currentblockid);
             } catch (NumberFormatException e) {
-                blockId = pmi.WallBlockId;
+                blockId = wgc.getBlockRepresentation(WALL_BLOCK).getId();
             }
         }
 
         block.setTypeIdAndData(blockId, blockData, true);
-    }
-
-    @Override
-    public boolean isValidId(String id) {
-        String[] coords = id.split(";");
-
-        if (coords.length != 2) {
-            return false;
-        } else {
-            try {
-                Integer.parseInt(coords[0]);
-                Integer.parseInt(coords[1]);
-                return true;
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
     }
 
     @Override
@@ -681,28 +689,12 @@ public class GenPlotManager extends AbstractGenManager {
 
     @Override
     public Location getPlotHome(World w, String id) {
-        GenMapInfo pmi = getMap(w);
+        WorldGenConfig wgc = getWGC(w);
 
-        if (pmi != null) {
-            return new Location(w, bottomX(id, w) + (topX(id, w) - bottomX(id, w)) / 2, pmi.RoadHeight + 2, bottomZ(id, w) - 2);
+        if (wgc != null) {
+            return new Location(w, bottomX(id, w) + (topX(id, w) - bottomX(id, w)) / 2, wgc.getInt(GROUND_LEVEL) + 2, bottomZ(id, w) - 2);
         } else {
             return w.getSpawnLocation();
         }
-    }
-
-    private GenMapInfo getMap(Location loc) {
-        return getMap(loc.getWorld());
-    }
-
-    private GenMapInfo getMap(Block b) {
-        return getMap(b.getWorld());
-    }
-
-    private GenMapInfo getMap(World w) {
-        return getMap(w.getName());
-    }
-
-    public GenMapInfo getMap(String worldname) {
-        return genplotmaps.get(worldname.toLowerCase());
     }
 }

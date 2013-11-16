@@ -58,11 +58,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
     @Override
     public ChunkGenerator getDefaultWorldGenerator(String worldname, String id) {
         String map = worldname.toLowerCase();
-        if (genPlotManager.genplotmaps.containsKey(map)) {
-            return new PlotGen(this, genPlotManager.getMap(map));
-        } else {
-            return new PlotGen(this);
-        }
+        return new PlotGen(this, genPlotManager.getWGC(map));
     }
 
     public void importOldConfigs() {
@@ -180,34 +176,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
                 wgc.set(GROUND_LEVEL, 250);
             }
 
-            GenMapInfo tempPlotInfo = new GenMapInfo();
-
-            tempPlotInfo.PathWidth = wgc.getInt(PATH_WIDTH);
-            tempPlotInfo.PlotSize = wgc.getInt(PLOT_SIZE);
-
-            tempPlotInfo.XTranslation = wgc.getInt(X_TRANSLATION);
-            tempPlotInfo.ZTranslation = wgc.getInt(Z_TRANSLATION);
-
-            tempPlotInfo.BottomBlockId = wgc.getBlockRepresentation(BASE_BLOCK).getId();
-            tempPlotInfo.BottomBlockValue = wgc.getBlockRepresentation(BASE_BLOCK).getData();
-            tempPlotInfo.WallBlockId = wgc.getBlockRepresentation(WALL_BLOCK).getId();
-            tempPlotInfo.WallBlockValue = wgc.getBlockRepresentation(WALL_BLOCK).getData();
-            tempPlotInfo.PlotFloorBlockId = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getId();
-            tempPlotInfo.PlotFloorBlockValue = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getData();
-            tempPlotInfo.PlotFillingBlockId = wgc.getBlockRepresentation(FILL_BLOCK).getId();
-            tempPlotInfo.PlotFillingBlockValue = wgc.getBlockRepresentation(FILL_BLOCK).getData();
-            tempPlotInfo.RoadMainBlockId = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getId();
-            tempPlotInfo.RoadMainBlockValue = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getData();
-            tempPlotInfo.RoadStripeBlockId = wgc.getBlockRepresentation(ROAD_ALT_BLOCK).getId();
-            tempPlotInfo.RoadStripeBlockValue = wgc.getBlockRepresentation(ROAD_ALT_BLOCK).getData();
-
-            tempPlotInfo.RoadHeight = wgc.getInt(GROUND_LEVEL);
-
-            tempPlotInfo.ProtectedWallBlockId = wgc.getString(PROTECTED_WALL_BLOCK);
-            tempPlotInfo.ForSaleWallBlockId = wgc.getString(FOR_SALE_WALL_BLOCK);
-            tempPlotInfo.AuctionWallBlockId = wgc.getString(AUCTION_WALL_BLOCK);
-
-            genPlotManager.genplotmaps.put(worldname.toLowerCase(), tempPlotInfo);
+            genPlotManager.putWGC(worldname.toLowerCase(), wgc);
         }
 
         saveConfig();
