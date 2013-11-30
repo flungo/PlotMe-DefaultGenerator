@@ -6,6 +6,7 @@ import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PATH_WIDTH;
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_FLOOR_BLOCK;
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_SIZE;
+import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_ALT_BLOCK;
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_MAIN_BLOCK;
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.WALL_BLOCK;
 import java.util.Random;
@@ -35,7 +36,7 @@ public class PlotPopulator extends BlockPopulator {
         final byte bottom = wgc.getBlockRepresentation(BASE_BLOCK).getData();
         final byte wall = wgc.getBlockRepresentation(WALL_BLOCK).getData();
         final byte floor1 = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getData();
-        final byte floor2 = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getData();
+        final byte floor2 = wgc.getBlockRepresentation(ROAD_ALT_BLOCK).getData();
         final byte plotfloor = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getData();
         final byte filling = wgc.getBlockRepresentation(FILL_BLOCK).getData();
 
