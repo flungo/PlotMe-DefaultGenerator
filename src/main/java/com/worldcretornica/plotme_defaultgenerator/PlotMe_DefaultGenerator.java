@@ -129,7 +129,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
                         }
                     } else {
                         // Migrate!
-                        worldCS.set(path, oldWorldCS.get(path));
+                        worldCS.set(newPath, oldWorldCS.get(path));
                         oldWorldCS.set(path, null);
                     }
                 }

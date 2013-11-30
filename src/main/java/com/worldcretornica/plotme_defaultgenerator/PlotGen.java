@@ -45,8 +45,8 @@ public class PlotGen extends AbstractChunkGenerator {
         final int roadheight = wgc.getInt(GROUND_LEVEL);
         final short bottom = wgc.getBlockRepresentation(BASE_BLOCK).getId();
         final short wall = wgc.getBlockRepresentation(WALL_BLOCK).getId();
-        final short floor1 = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getId();
-        final short floor2 = wgc.getBlockRepresentation(ROAD_ALT_BLOCK).getId();
+        final short floorMain = wgc.getBlockRepresentation(ROAD_MAIN_BLOCK).getId();
+        final short floorAlt = wgc.getBlockRepresentation(ROAD_ALT_BLOCK).getId();
         final short plotfloor = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getId();
         final short filling = wgc.getBlockRepresentation(FILL_BLOCK).getId();
 
@@ -101,7 +101,7 @@ public class PlotGen extends AbstractChunkGenerator {
 
                             if (found) {
                                 //result[(x * 16 + z) * 128 + y] = floor1; //floor1
-                                setBlock(result, x, y, z, floor1);
+                                setBlock(result, x, y, z, floorAlt);
                             } else {
                                 //result[(x * 16 + z) * 128 + y] = filling; //filling
                                 setBlock(result, x, y, z, filling);
@@ -111,20 +111,20 @@ public class PlotGen extends AbstractChunkGenerator {
                             if ((valz - n3 + mod1) % size == 0 || (valz + n3 + mod2) % size == 0
                                     || (valz - n2 + mod1) % size == 0 || (valz + n2 + mod2) % size == 0) {
                                 //result[(x * 16 + z) * 128 + y] = floor1; //floor1
-                                setBlock(result, x, y, z, floor1);
+                                setBlock(result, x, y, z, floorAlt);
                             } else {
                                 //result[(x * 16 + z) * 128 + y] = floor2; //floor2
-                                setBlock(result, x, y, z, floor2);
+                                setBlock(result, x, y, z, floorMain);
                             }
                         } else if ((valx - n1 + mod1) % size == 0 || (valx + n1 + mod2) % size == 0) //middle+2
                         {
                             if ((valz - n2 + mod1) % size == 0 || (valz + n2 + mod2) % size == 0
                                     || (valz - n1 + mod1) % size == 0 || (valz + n1 + mod2) % size == 0) {
                                 //result[(x * 16 + z) * 128 + y] = floor2; //floor2
-                                setBlock(result, x, y, z, floor2);
+                                setBlock(result, x, y, z, floorMain);
                             } else {
                                 //result[(x * 16 + z) * 128 + y] = floor1; //floor1
-                                setBlock(result, x, y, z, floor1);
+                                setBlock(result, x, y, z, floorAlt);
                             }
                         } else {
                             boolean found = false;
@@ -137,11 +137,11 @@ public class PlotGen extends AbstractChunkGenerator {
 
                             if (found) {
                                 //result[(x * 16 + z) * 128 + y] = floor1; //floor1
-                                setBlock(result, x, y, z, floor1);
+                                setBlock(result, x, y, z, floorAlt);
                             } else {
                                 if ((valz - n2 + mod1) % size == 0 || (valz + n2 + mod2) % size == 0) {
                                     //result[(x * 16 + z) * 128 + y] = floor2; //floor2
-                                    setBlock(result, x, y, z, floor2);
+                                    setBlock(result, x, y, z, floorMain);
                                 } else {
                                     boolean found2 = false;
                                     for (double i = n1; i >= 0; i--) {
@@ -153,7 +153,7 @@ public class PlotGen extends AbstractChunkGenerator {
 
                                     if (found2) {
                                         //result[(x * 16 + z) * 128 + y] = floor1; //floor1
-                                        setBlock(result, x, y, z, floor1);
+                                        setBlock(result, x, y, z, floorAlt);
                                     } else {
                                         boolean found3 = false;
                                         for (double i = n3; i >= 0; i--) {
@@ -165,7 +165,7 @@ public class PlotGen extends AbstractChunkGenerator {
 
                                         if (found3) {
                                             //result[(x * 16 + z) * 128 + y] = floor1; //floor1
-                                            setBlock(result, x, y, z, floor1);
+                                            setBlock(result, x, y, z, floorAlt);
                                         } else {
                                             //result[(x * 16 + z) * 128 + y] = plotfloor; //plotfloor
                                             setBlock(result, x, y, z, plotfloor);
