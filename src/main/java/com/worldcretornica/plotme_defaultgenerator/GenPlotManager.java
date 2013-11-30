@@ -507,8 +507,6 @@ public class GenPlotManager extends AbstractGenManager {
 
     @Override
     public void adjustPlotFor(World w, String id, boolean Claimed, boolean Protected, boolean Auctionned, boolean ForSale) {
-        //Plot plot = getPlotById(l);
-        //World w = l.getWorld();
         WorldGenConfig wgc = getWGC(w);
 
         List<String> wallids = new ArrayList<String>();
@@ -632,33 +630,11 @@ public class GenPlotManager extends AbstractGenManager {
                         for (int y = 0; y < w.getMaxHeight(); y++) {
                             Block block = w.getBlockAt(x + xx, y, z + zz);
                             blocks[x][z][y] = block.getState();
-
-                            /*if(PlotMe.usinglwc)
-                             {
-                             LWC lwc = com.griefcraft.lwc.LWC.getInstance();
-                             Material material = block.getType();
-
-                             boolean ignoreBlockDestruction = Boolean.parseBoolean(lwc.resolveProtectionConfiguration(material, "ignoreBlockDestruction"));
-
-                             if (!ignoreBlockDestruction)
-                             {
-                             Protection protection = lwc.findProtection(block);
-
-                             if(protection != null)
-                             {
-                             protection.remove();
-                             }
-                             }
-                             }*/
                         }
                     }
                 }
 
-                try {
-                    w.regenerateChunk(cx, cz);
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
+                w.regenerateChunk(cx, cz);
 
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {

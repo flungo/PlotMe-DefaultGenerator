@@ -36,22 +36,16 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
     public static final String CORE_OLD_CONFIG = "config-old.yml";
     public static final String DEFAULT_WORLD = "plotsworld";
 
-    public String PREFIX;
-
     public String language;
 
     private Boolean advancedlogging;
-
-    private HashMap<String, String> captions;
 
     private GenPlotManager genPlotManager;
 
     @Override
     public void takedown() {
-        captions = null;
         genPlotManager = null;
         setAdvancedLogging(null);
-        PREFIX = null;
     }
 
     @Override
@@ -105,7 +99,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
         // Import each world
         for (String worldname : oldWorldsCS.getKeys(false)) {
-            getLogger().info("Importing world '" + worldname + "' from PlotMe");
+            getLogger().log(Level.INFO, "Importing world '{0}' from PlotMe", worldname);
             ConfigurationSection oldWorldCS = oldWorldsCS.getConfigurationSection(worldname);
 
             // Get the local config world section and create it if it doesn't exist
@@ -170,7 +164,6 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
     @Override
     public void initialize() {
-        PREFIX = ChatColor.BLUE + "[" + getName() + "] " + ChatColor.RESET;
         genPlotManager = new GenPlotManager(this);
 
         // Setup PluginListener
@@ -200,7 +193,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
             // Validate config
             if (wgc.getInt(GROUND_LEVEL) > 250) {
-                getLogger().severe(PREFIX + "RoadHeight above 250 is unsafe. This is the height at which your road is located. Setting it to 250.");
+                getLogger().severe("RoadHeight above 250 is unsafe. This is the height at which your road is located. Setting it to 250.");
                 wgc.set(GROUND_LEVEL, 250);
             }
 
@@ -217,15 +210,6 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
             metrics.start();
         } catch (IOException ex) {
             Logger.getLogger(PlotMe_DefaultGenerator.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    public String caption(String s) {
-        if (captions.containsKey(s)) {
-            return addColor(captions.get(s));
-        } else {
-            getLogger().warning("[" + getName() + "] Missing caption: " + s);
-            return "ERROR:Missing caption '" + s + "'";
         }
     }
 
