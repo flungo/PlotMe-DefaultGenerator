@@ -40,11 +40,11 @@ public class PlotPopulator extends BlockPopulator {
         final byte plotfloor = wgc.getBlockRepresentation(PLOT_FLOOR_BLOCK).getData();
         final byte filling = wgc.getBlockRepresentation(FILL_BLOCK).getData();
 
-        int cx = chunk.getX();
-        int cz = chunk.getZ();
+        final int cx = chunk.getX();
+        final int cz = chunk.getZ();
 
-        int xx = cx << 4;
-        int zz = cz << 4;
+        final int xx = cx << 4;
+        final int zz = cz << 4;
 
         double size = plotsize + pathsize;
         int valx;
@@ -70,11 +70,11 @@ public class PlotPopulator extends BlockPopulator {
             mod2 = -1;
         }
 
-        for (int x = 0; x < 16; x++) {
-            for (int z = 0; z < 16; z++) {
+        for (int x = xx; x < xx + 16; x++) {
+            for (int z = zz; z < zz + 16; z++) {
                 int height = roadheight + 2;
 
-                w.setBiome(x + xx, z + zz, Biome.PLAINS);
+                w.setBiome(x, z, Biome.PLAINS);
 
                 valx = (cx * 16 + x);
                 valz = (cz * 16 + z);
@@ -82,7 +82,7 @@ public class PlotPopulator extends BlockPopulator {
                 for (int y = 0; y < height; y++) {
                     if (y == 0) {
                         //result[(x * 16 + z) * 128 + y] = bottom;
-                        setBlock(w, x + xx, y, z + zz, bottom);
+                        setBlock(w, x, y, z, bottom);
 
                     } else if (y == roadheight) {
                         if ((valx - n3 + mod1) % size == 0 || (valx + n3 + mod2) % size == 0) //middle+3
@@ -97,30 +97,30 @@ public class PlotPopulator extends BlockPopulator {
 
                             if (found) {
                                 //result[(x * 16 + z) * 128 + y] = floor1; //floor1
-                                setBlock(w, x + xx, y, z + zz, floor1);
+                                setBlock(w, x, y, z, floor1);
                             } else {
                                 //result[(x * 16 + z) * 128 + y] = filling; //filling
-                                setBlock(w, x + xx, y, z + zz, filling);
+                                setBlock(w, x, y, z, filling);
                             }
                         } else if ((valx - n2 + mod1) % size == 0 || (valx + n2 + mod2) % size == 0) //middle+2
                         {
                             if ((valz - n3 + mod1) % size == 0 || (valz + n3 + mod2) % size == 0
                                     || (valz - n2 + mod1) % size == 0 || (valz + n2 + mod2) % size == 0) {
                                 //result[(x * 16 + z) * 128 + y] = floor1; //floor1
-                                setBlock(w, x + xx, y, z + zz, floor1);
+                                setBlock(w, x, y, z, floor1);
                             } else {
                                 //result[(x * 16 + z) * 128 + y] = floor2; //floor2
-                                setBlock(w, x + xx, y, z + zz, floor2);
+                                setBlock(w, x, y, z, floor2);
                             }
                         } else if ((valx - n1 + mod1) % size == 0 || (valx + n1 + mod2) % size == 0) //middle+2
                         {
                             if ((valz - n2 + mod1) % size == 0 || (valz + n2 + mod2) % size == 0
                                     || (valz - n1 + mod1) % size == 0 || (valz + n1 + mod2) % size == 0) {
                                 //result[(x * 16 + z) * 128 + y] = floor2; //floor2
-                                setBlock(w, x + xx, y, z + zz, floor2);
+                                setBlock(w, x, y, z, floor2);
                             } else {
                                 //result[(x * 16 + z) * 128 + y] = floor1; //floor1
-                                setBlock(w, x + xx, y, z + zz, floor1);
+                                setBlock(w, x, y, z, floor1);
                             }
                         } else {
                             boolean found = false;
@@ -133,11 +133,11 @@ public class PlotPopulator extends BlockPopulator {
 
                             if (found) {
                                 //result[(x * 16 + z) * 128 + y] = floor1; //floor1
-                                setBlock(w, x + xx, y, z + zz, floor1);
+                                setBlock(w, x, y, z, floor1);
                             } else {
                                 if ((valz - n2 + mod1) % size == 0 || (valz + n2 + mod2) % size == 0) {
                                     //result[(x * 16 + z) * 128 + y] = floor2; //floor2
-                                    setBlock(w, x + xx, y, z + zz, floor2);
+                                    setBlock(w, x, y, z, floor2);
                                 } else {
                                     boolean found2 = false;
                                     for (double i = n1; i >= 0; i--) {
@@ -149,7 +149,7 @@ public class PlotPopulator extends BlockPopulator {
 
                                     if (found2) {
                                         //result[(x * 16 + z) * 128 + y] = floor1; //floor1
-                                        setBlock(w, x + xx, y, z + zz, floor1);
+                                        setBlock(w, x, y, z, floor1);
                                     } else {
                                         boolean found3 = false;
                                         for (double i = n3; i >= 0; i--) {
@@ -161,10 +161,10 @@ public class PlotPopulator extends BlockPopulator {
 
                                         if (found3) {
                                             //result[(x * 16 + z) * 128 + y] = floor1; //floor1
-                                            setBlock(w, x + xx, y, z + zz, floor1);
+                                            setBlock(w, x, y, z, floor1);
                                         } else {
                                             //result[(x * 16 + z) * 128 + y] = plotfloor; //plotfloor
-                                            setBlock(w, x + xx, y, z + zz, plotfloor);
+                                            setBlock(w, x, y, z, plotfloor);
                                         }
                                     }
                                 }
@@ -187,7 +187,7 @@ public class PlotPopulator extends BlockPopulator {
                                 //setBlock(result, x, y, z, air);
                             } else {
                                 //result[(x * 16 + z) * 128 + y] = wall;
-                                setBlock(w, x + xx, y, z + zz, wall);
+                                setBlock(w, x, y, z, wall);
                             }
                         } else {
                             boolean found = false;
@@ -204,7 +204,7 @@ public class PlotPopulator extends BlockPopulator {
                             } else {
                                 if ((valz - n3 + mod1) % size == 0 || (valz + n3 + mod2) % size == 0) {
                                     //result[(x * 16 + z) * 128 + y] = wall;
-                                    setBlock(w, x + xx, y, z + zz, wall);
+                                    setBlock(w, x, y, z, wall);
                                 } else {
                                     //result[(x * 16 + z) * 128 + y] = air;
                                     //setBlock(result, x, y, z, air);
@@ -213,7 +213,7 @@ public class PlotPopulator extends BlockPopulator {
                         }
                     } else {
                         //result[(x * 16 + z) * 128 + y] = filling;
-                        setBlock(w, x + xx, y, z + zz, filling);
+                        setBlock(w, x, y, z, filling);
                     }
                 }
             }
