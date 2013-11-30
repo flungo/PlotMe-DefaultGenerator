@@ -1,14 +1,14 @@
-package com.worldcretornica.plotme_defaultgenerator;
+package com.worldcretornica.plotme.defaultgenerator;
 
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.BASE_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.FILL_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.GROUND_LEVEL;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PATH_WIDTH;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_FLOOR_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_SIZE;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_ALT_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_MAIN_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.WALL_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.BASE_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.FILL_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.GROUND_LEVEL;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.PATH_WIDTH;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.PLOT_FLOOR_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.PLOT_SIZE;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.ROAD_ALT_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.ROAD_MAIN_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.WALL_BLOCK;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,17 +17,17 @@ import me.flungo.bukkit.plotme.abstractgenerator.WorldGenConfig;
 import org.bukkit.World;
 import org.bukkit.generator.BlockPopulator;
 
-public class PlotGen extends AbstractChunkGenerator {
+public class DefaultChunkGenerator extends AbstractChunkGenerator {
 
     private final String worldname;
-    private final PlotMe_DefaultGenerator plugin;
+    private final DefaultGenerator plugin;
     private final List<BlockPopulator> blockPopulators = new ArrayList<BlockPopulator>();
 
-    public PlotGen(PlotMe_DefaultGenerator instance, String worldname) {
+    public DefaultChunkGenerator(DefaultGenerator instance, String worldname) {
         super(instance, worldname);
         this.plugin = instance;
         this.worldname = worldname;
-        blockPopulators.add(new PlotPopulator(plugin, worldname));
+        blockPopulators.add(new DefaultDataPopulator(plugin, worldname));
     }
 
     @Override

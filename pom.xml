@@ -6,7 +6,7 @@
     <name>PlotMe-DefaultGenerator</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <main.class>com.worldcretornica.plotme_defaultgenerator.PlotMe_DefaultGenerator</main.class>
+        <main.class>com.worldcretornica.plotme.defaultgenerator.DefaultGenerator</main.class>
     </properties>
     <build>
         <defaultGoal>clean package install</defaultGoal>

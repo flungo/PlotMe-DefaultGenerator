@@ -1,19 +1,19 @@
-package com.worldcretornica.plotme_defaultgenerator;
+package com.worldcretornica.plotme.defaultgenerator;
 
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.AUCTION_WALL_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.BASE_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.FILL_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.FOR_SALE_WALL_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.GROUND_LEVEL;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PATH_WIDTH;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_FLOOR_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PLOT_SIZE;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.PROTECTED_WALL_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_ALT_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_MAIN_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.WALL_BLOCK;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.X_TRANSLATION;
-import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.Z_TRANSLATION;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.AUCTION_WALL_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.BASE_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.FILL_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.FOR_SALE_WALL_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.GROUND_LEVEL;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.PATH_WIDTH;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.PLOT_FLOOR_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.PLOT_SIZE;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.PROTECTED_WALL_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.ROAD_ALT_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.ROAD_MAIN_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.WALL_BLOCK;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.X_TRANSLATION;
+import static com.worldcretornica.plotme.defaultgenerator.DefaultWorldConfigPath.Z_TRANSLATION;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginManager;
 import org.mcstats.Metrics;
 
-public class PlotMe_DefaultGenerator extends AbstractGenerator {
+public class DefaultGenerator extends AbstractGenerator {
 
     public static final String CORE_OLD_CONFIG = "config-old.yml";
     public static final String DEFAULT_WORLD = "plotsworld";
@@ -40,7 +40,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
     private Boolean advancedlogging;
 
-    private GenPlotManager genPlotManager;
+    private DefaultPlotManager genPlotManager;
 
     @Override
     public void takedown() {
@@ -50,7 +50,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
     @Override
     public ChunkGenerator getDefaultWorldGenerator(String worldname, String id) {
-        return new PlotGen(this, worldname);
+        return new DefaultChunkGenerator(this, worldname);
     }
 
     public void importOldConfigs() {
@@ -164,7 +164,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
     @Override
     public void initialize() {
-        genPlotManager = new GenPlotManager(this);
+        genPlotManager = new DefaultPlotManager(this);
         setupListeners();
         setupConfigs();
         setupMetrics();
@@ -216,7 +216,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
             metrics.start();
         } catch (IOException ex) {
-            Logger.getLogger(PlotMe_DefaultGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DefaultGenerator.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

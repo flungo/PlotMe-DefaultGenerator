@@ -6,7 +6,7 @@
  *
  * Created by Fabrizio Lungo <fab@lungo.co.uk>, November 2013
  */
-package com.worldcretornica.plotme_defaultgenerator;
+package com.worldcretornica.plotme.defaultgenerator;
 
 import me.flungo.bukkit.plotme.abstractgenerator.AbstractGenerator;
 import org.bukkit.event.EventHandler;
@@ -19,9 +19,9 @@ import org.bukkit.event.server.PluginEnableEvent;
  */
 public class PluginListener implements Listener {
 
-    private final PlotMe_DefaultGenerator plugin;
+    private final DefaultGenerator plugin;
 
-    public PluginListener(PlotMe_DefaultGenerator plugin) {
+    public PluginListener(DefaultGenerator plugin) {
         this.plugin = plugin;
     }
 

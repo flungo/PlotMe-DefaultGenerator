@@ -6,7 +6,7 @@
  *
  * Created by Fabrizio Lungo <fab@lungo.co.uk>, November 2013
  */
-package com.worldcretornica.plotme_defaultgenerator;
+package com.worldcretornica.plotme.defaultgenerator;
 
 import me.flungo.bukkit.plotme.abstractgenerator.AbstractWorldConfigPath;
 import me.flungo.bukkit.plotme.abstractgenerator.WorldConfigPath;
