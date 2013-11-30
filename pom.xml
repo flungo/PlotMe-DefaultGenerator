@@ -6,28 +6,18 @@
     <name>PlotMe-DefaultGenerator</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <main.class>com.worldcretornica.plotme_defaultgenerator.PlotMe_DefaultGenerator</main.class>
     </properties>
-    <dependencies>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.6.4-R2.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.worldcretornica</groupId>
-            <artifactId>PlotMe-Core</artifactId>
-            <version>0.14-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>me.flungo.bukkit</groupId>
-            <artifactId>PlotMe-AbstractGenerator</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
     <build>
         <defaultGoal>clean package install</defaultGoal>
-        <finalName>PlotMe-DefaultGenerator</finalName>
+        <finalName>${project.name}</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
+        <resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -80,17 +70,8 @@
                 </configuration>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <targetPath>.</targetPath>
-                <filtering>true</filtering>
-                <directory>${project.basedir}</directory>
-                <includes>
-                    <include>*.yml</include>
-                </includes>
-            </resource>
-        </resources>
     </build>
+
     <repositories>
         <repository>
             <id>bukkit-repo</id>
@@ -105,4 +86,23 @@
             <url>http://ci.flungo.me/plugin/repository/everything/</url>
         </repository>
     </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.6.4-R2.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.worldcretornica</groupId>
+            <artifactId>PlotMe-Core</artifactId>
+            <version>0.14-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>me.flungo.bukkit</groupId>
+            <artifactId>PlotMe-AbstractGenerator</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
 </project>
