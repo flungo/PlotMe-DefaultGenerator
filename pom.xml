@@ -85,6 +85,10 @@
             <id>flungo-repo</id>
             <url>http://ci.flungo.me/plugin/repository/everything/</url>
         </repository>
+        <repository>
+            <id>Plugin Metrics</id>
+            <url>http://repo.mcstats.org/content/repositories/public</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -102,6 +106,11 @@
             <groupId>me.flungo.bukkit</groupId>
             <artifactId>PlotMe-AbstractGenerator</artifactId>
             <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mcstats.bukkit</groupId>
+            <artifactId>metrics</artifactId>
+            <version>R6</version>
         </dependency>
     </dependencies>
 

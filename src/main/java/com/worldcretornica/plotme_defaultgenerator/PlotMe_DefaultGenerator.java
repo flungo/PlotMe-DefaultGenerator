@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import me.flungo.bukkit.plotme.abstractgenerator.AbstractGenManager;
 import me.flungo.bukkit.plotme.abstractgenerator.AbstractGenerator;
 import me.flungo.bukkit.plotme.abstractgenerator.WorldGenConfig;
@@ -28,6 +29,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginManager;
+import org.mcstats.Metrics;
 
 public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
@@ -206,6 +208,16 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
         }
 
         saveConfig();
+    }
+
+    private void doMetric() {
+        try {
+            Metrics metrics = new Metrics(this);
+
+            metrics.start();
+        } catch (IOException ex) {
+            Logger.getLogger(PlotMe_DefaultGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public String caption(String s) {
