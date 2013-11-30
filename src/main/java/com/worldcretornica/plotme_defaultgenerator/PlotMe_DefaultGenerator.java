@@ -134,17 +134,32 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
                 }
             }
 
+            // If full imported delete from config-old.yml
+            if (oldWorldCS.getKeys(false).isEmpty()) {
+                oldWorldsCS.set(worldname, null);
+            }
+
             // Add world to Manager
             genPlotManager.putWGC(worldname, getWorldGenConfig(worldname));
+        }
+
+        // If all worlds are imported, delete worlds CS from config-old.yml
+        if (oldWorldsCS.getKeys(false).isEmpty()) {
+            oldConfig.set(WORLDS_CONFIG_SECTION, null);
         }
 
         // Save the configs
         saveConfig();
 
-        try {
-            oldConfig.save(oldConfigFile);
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Could not save config to " + oldConfigFile, ex);
+        // If there is anything left then save, otherwise delete config-old.yml
+        if (oldConfig.getKeys(false).isEmpty()) {
+            oldConfigFile.delete();
+        } else {
+            try {
+                oldConfig.save(oldConfigFile);
+            } catch (IOException ex) {
+                getLogger().log(Level.SEVERE, "Could not save config to " + oldConfigFile, ex);
+            }
         }
     }
 
