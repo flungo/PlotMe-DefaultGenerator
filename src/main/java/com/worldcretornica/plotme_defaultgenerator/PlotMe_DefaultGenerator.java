@@ -63,11 +63,13 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
     }
 
     public void importOldConfigs() {
+        getLogger().info("Checking if there are any old PlotMe configs to import.");
         // Get the old config file
         final File oldConfigFile = new File(getCoreFolder(), CORE_OLD_CONFIG);
 
         // If it doesn't exist there is nothing to import
         if (!oldConfigFile.exists()) {
+            getLogger().info("No old PlotMe configs to import.");
             return;
         }
 
@@ -77,8 +79,11 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
         // If there are no worlds then there is nothing to import
         if (oldWorldsCS == null || oldWorldsCS.getKeys(false).isEmpty()) {
+            getLogger().info("No old PlotMe configs to import.");
             return;
         }
+
+        getLogger().info("Importing old PlotMe data");
 
         // Get the local worlds config section
         final ConfigurationSection worldsCS = getConfig().getConfigurationSection(WORLDS_CONFIG_SECTION);
@@ -103,6 +108,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
 
         // Import each world
         for (String worldname : oldWorldsCS.getKeys(false)) {
+            getLogger().info("Importing world '" + worldname + "' from PlotMe");
             ConfigurationSection oldWorldCS = oldWorldsCS.getConfigurationSection(worldname);
 
             // Get the local config world section and create it if it doesn't exist
@@ -154,11 +160,13 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
         // If there is anything left then save, otherwise delete config-old.yml
         if (oldConfig.getKeys(false).isEmpty()) {
             oldConfigFile.delete();
+            getLogger().info("Old data from PlotMe has been fully imported. " + CORE_OLD_CONFIG + " has been deleted.");
         } else {
             try {
                 oldConfig.save(oldConfigFile);
+                getLogger().info("Unimported config data in " + CORE_OLD_CONFIG + " of PlotMe, please review manually.");
             } catch (IOException ex) {
-                getLogger().log(Level.SEVERE, "Could not save config to " + oldConfigFile, ex);
+                getLogger().log(Level.SEVERE, "Could not save " + CORE_OLD_CONFIG + " to " + oldConfigFile, ex);
             }
         }
     }
