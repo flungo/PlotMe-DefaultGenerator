@@ -9,20 +9,30 @@ import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_ALT_BLOCK;
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.ROAD_MAIN_BLOCK;
 import static com.worldcretornica.plotme_defaultgenerator.DefaultWorldConfigPath.WALL_BLOCK;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import me.flungo.bukkit.plotme.abstractgenerator.AbstractChunkGenerator;
 import me.flungo.bukkit.plotme.abstractgenerator.WorldGenConfig;
 import org.bukkit.World;
+import org.bukkit.generator.BlockPopulator;
 
 public class PlotGen extends AbstractChunkGenerator {
 
     private final String worldname;
     private final PlotMe_DefaultGenerator plugin;
+    private final List<BlockPopulator> blockPopulators = new ArrayList<BlockPopulator>();
 
     public PlotGen(PlotMe_DefaultGenerator instance, String worldname) {
         super(instance, worldname);
         this.plugin = instance;
         this.worldname = worldname;
+        blockPopulators.add(new PlotPopulator(plugin, worldname));
+    }
+
+    @Override
+    public List<BlockPopulator> getDefaultPopulators(World world) {
+        return blockPopulators;
     }
 
     @Override
