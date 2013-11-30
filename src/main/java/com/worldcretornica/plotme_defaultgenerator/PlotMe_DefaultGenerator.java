@@ -133,6 +133,9 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
                     }
                 }
             }
+
+            // Add world to Manager
+            genPlotManager.putWGC(worldname, getWorldGenConfig(worldname));
         }
 
         // Save the configs
@@ -181,7 +184,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
                 wgc.set(GROUND_LEVEL, 250);
             }
 
-            genPlotManager.putWGC(worldname.toLowerCase(), wgc);
+            genPlotManager.putWGC(worldname, wgc);
         }
 
         saveConfig();
