@@ -99,7 +99,7 @@ public class DefaultGenerator extends AbstractGenerator {
 
         // Import each world
         for (String worldname : oldWorldsCS.getKeys(false)) {
-            getLogger().log(Level.INFO, "Importing world '{0}' from PlotMe", worldname);
+            getLogger().log(Level.INFO, "Importing world {0} from PlotMe", worldname);
             ConfigurationSection oldWorldCS = oldWorldsCS.getConfigurationSection(worldname);
 
             // Get the local config world section and create it if it doesn't exist
@@ -120,7 +120,7 @@ public class DefaultGenerator extends AbstractGenerator {
                             // Can't migrate the path
                             String fullPathBase = oldWorldCS.getCurrentPath();
                             getLogger().log(Level.WARNING,
-                                    "Could not migrate '{0}.{1}' from {2} to '{0}.{3}' in {4}{5}: Path exists in desitnation. Please merge manually." + DEFAULT_CONFIG_NAME,
+                                    "Could not migrate {0}.{1} from {2} to {0}.{3} in {4}{5}: Path exists in desitnation. Please merge manually." + DEFAULT_CONFIG_NAME,
                                     new Object[]{fullPathBase, path, oldConfigFile, newPath, getConfigFolder(), File.separator});
                         }
                     } else {
