@@ -16,17 +16,18 @@ import org.bukkit.World;
 
 public class PlotGen extends AbstractChunkGenerator {
 
-    private final WorldGenConfig wgc;
+    private final String worldname;
     private final PlotMe_DefaultGenerator plugin;
 
-    public PlotGen(PlotMe_DefaultGenerator instance, WorldGenConfig wgc) {
-        super(instance, wgc);
+    public PlotGen(PlotMe_DefaultGenerator instance, String worldname) {
+        super(instance, worldname);
         this.plugin = instance;
-        this.wgc = wgc;
+        this.worldname = worldname;
     }
 
     @Override
     public short[][] generateExtBlockSections(World world, Random random, int cx, int cz, BiomeGrid biomes) {
+        WorldGenConfig wgc = plugin.getGeneratorManager().getWGC(worldname);
         final int maxY = world.getMaxHeight();
 
         final int plotsize = wgc.getInt(PLOT_SIZE);

@@ -17,14 +17,18 @@ import org.bukkit.generator.BlockPopulator;
 
 public class PlotPopulator extends BlockPopulator {
 
-    private final WorldGenConfig wgc;
+    private final PlotMe_DefaultGenerator plugin;
+    private final String worldname;
 
-    public PlotPopulator(WorldGenConfig wgc) {
-        this.wgc = wgc;
+    public PlotPopulator(PlotMe_DefaultGenerator plugin, String worldname) {
+        this.plugin = plugin;
+        this.worldname = worldname;
     }
 
     @Override
     public void populate(World w, Random rand, Chunk chunk) {
+        WorldGenConfig wgc = plugin.getGeneratorManager().getWGC(worldname);
+
         final int plotsize = wgc.getInt(PLOT_SIZE);
         final int pathsize = wgc.getInt(PATH_WIDTH);
         final int roadheight = wgc.getInt(GROUND_LEVEL);
