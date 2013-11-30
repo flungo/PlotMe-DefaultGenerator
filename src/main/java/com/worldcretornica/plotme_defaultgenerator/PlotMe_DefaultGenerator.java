@@ -165,11 +165,18 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
     @Override
     public void initialize() {
         genPlotManager = new GenPlotManager(this);
+        setupListeners();
+        setupConfigs();
+        setupMetrics();
+    }
 
+    private void setupListeners() {
         // Setup PluginListener
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new PluginListener(this), this);
+    }
 
+    private void setupConfigs() {
         // Set defaults for WorldGenConfig
         for (DefaultWorldConfigPath wcp : DefaultWorldConfigPath.values()) {
             WorldGenConfig.putDefault(wcp);
@@ -203,7 +210,7 @@ public class PlotMe_DefaultGenerator extends AbstractGenerator {
         saveConfig();
     }
 
-    private void doMetric() {
+    private void setupMetrics() {
         try {
             Metrics metrics = new Metrics(this);
 
